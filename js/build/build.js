@@ -538,10 +538,10 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
     this.imageWidth = options.imageWidth || 20;
     this.imageDepth = options.imageDepth || 20;
     this.fallThroughImages = options.fallThroughImages || true;
-
+    this.yLevel = options.yLevel || -11;
     this.distanceBetweenPhotos = options.distanceBetweenPhotos || 25;
     this.downwardVelocity = options.initialDownwardVelocity || -0.001;
-    this.thresholdVelocity = options.thresholdVelocity || -0.022;
+    this.thresholdVelocity = options.thresholdVelocity || -0.031;
     this.slowAcceleration = options.slowAcceleration || -0.00003;
     this.fastAcceleration = options.fastAcceleration || -0.0005; // good fun value is -0.0005
 
@@ -614,6 +614,7 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
 
         if (this.fallThroughImages) {
           mesh.rotation.x = Math.PI / 2;
+          mesh.rotation.y = Math.PI; // makes initial pictures right side up -- hopefully
         }
 
         // cool stacky intersection way: this.yLevel - (index * repeatIndex * this.distanceBetweenPhotos)
@@ -2877,6 +2878,12 @@ var SheenScene = require("./sheen-scene.es6").SheenScene;
 
 var Gallery = require("./gallery.es6").Gallery;
 
+var sound = new buzz.sound("/media/falling2", {
+  formats: ["mp3"],
+  webAudioApi: true,
+  volume: 100
+});
+
 var MainScene = exports.MainScene = (function (_SheenScene) {
 
   /// Init
@@ -2885,6 +2892,8 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
     _classCallCheck(this, MainScene);
 
     _get(Object.getPrototypeOf(MainScene.prototype), "constructor", this).call(this, renderer, camera, scene, options);
+    buzz.defaults.duration = 500;
+    sound.loop().play().fadeIn();
 
     this.name = "Art Decade";
   }

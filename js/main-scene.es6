@@ -7,14 +7,25 @@ let kt = require('kutility');
 import {SheenScene} from './sheen-scene.es6';
 import {Gallery} from './gallery.es6';
 
+let sound = new buzz.sound('/media/falling2', {
+    formats: [ "mp3"],
+    webAudioApi: true,
+    volume: 100
+  });
+
+
 export class MainScene extends SheenScene {
 
   /// Init
 
   constructor(renderer, camera, scene, options) {
     super(renderer, camera, scene, options);
+    buzz.defaults.duration = 500;
+    sound.loop().play().fadeIn();
+
 
     this.name = "Art Decade";
+
   }
 
   /// Overrides
@@ -81,6 +92,7 @@ export class MainScene extends SheenScene {
 
     this.lights = [this.frontLight, this.backLight, this.leftLight, this.rightLight];
 
+
     function makeDirectionalLight() {
       var light = new THREE.DirectionalLight( 0xffffff, 0.9);
       light.color.setHSL( 0.1, 1, 0.95 );
@@ -95,6 +107,8 @@ export class MainScene extends SheenScene {
       light.shadowDarkness = 0.6;
       light.shadowMapWidth = light.shadowMapHeight = 2048;
     }
+
+
   }
 
 }
