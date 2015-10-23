@@ -547,7 +547,7 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
     this.thresholdVelocity = options.thresholdVelocity || -0.022;
     this.slowAcceleration = options.slowAcceleration || -0.00003;
     this.fastAcceleration = options.fastAcceleration || -0.0005; // good fun value is -0.0005
-    this.repeatCount = options.repeatCount || Math.round(1000 / options.media.length);
+    this.repeatCount = 1;
     this.fallThroughImages = options.fallThroughImages || true;
 
     _get(Object.getPrototypeOf(Hole.prototype), "constructor", this).call(this, options);
@@ -648,6 +648,8 @@ var Gallery = exports.Gallery = (function () {
 
         var filename = "/data/dz_media.json";
         $.getJSON(filename, function (data) {
+          console.log(data);
+
           _this.layout = _this.layoutCreator({
             container: _this.meshContainer,
             controlObject: _this.controlObject,
