@@ -7,6 +7,17 @@ let kt = require('kutility');
 import {SheenScene} from './sheen-scene.es6';
 import {Gallery} from './gallery.es6';
 
+let sounds = [];
+let soundFilenames = ['/media/falling'];
+soundFilenames.forEach((filename) => {
+  let sound = new buzz.sound(filename, {
+    formats: [ "ogg", "mp3"],
+    webAudioApi: true,
+    volume: 30
+  });
+  sounds.push(sound);
+});
+
 export class MainScene extends SheenScene {
 
   /// Init
