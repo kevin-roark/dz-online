@@ -640,7 +640,7 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
           return;
         }
 
-        console.log("laying out: " + index);
+        //console.log('laying out: ' + index);
 
         var width = this.imageWidth;
         var height = media.thumbnail.width / media.thumbnail.height * width;

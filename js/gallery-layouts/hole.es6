@@ -44,7 +44,7 @@ export class Hole extends GalleryLayout {
     }
 
     // face me down
-    this.pitchObject.rotation.x = -Math.PI / 2 ;
+    this.pitchObject.rotation.x = -Math.PI / 2;
   }
 
   start() {
@@ -108,7 +108,7 @@ export class Hole extends GalleryLayout {
       return;
     }
 
-    console.log('laying out: ' + index);
+    //console.log('laying out: ' + index);
 
     var width = this.imageWidth;
     var height = (media.thumbnail.width / media.thumbnail.height) * width;
@@ -125,7 +125,7 @@ export class Hole extends GalleryLayout {
     }
 
     ///these turn the camera wildly after it his 666 index.
-    
+
     //this.controlObject.rotation.y = this.turnControlObject(index);
     //this.pitchObject.rotation.x = this.turnPitchObject(index);
 
