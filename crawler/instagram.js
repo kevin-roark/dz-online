@@ -17,7 +17,7 @@ module.exports.request = function(endpoint, callback) {
   request
     .get(url)
     .query(credentials)
-    .query({count: 25})
+    .query({count: 50})
     .end(function(err, res) {
       if (err) {
         console.log('instagram error:');
