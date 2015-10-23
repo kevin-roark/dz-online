@@ -25,16 +25,18 @@ class Sheen extends ThreeBoiler {
     this.controls = new FlyControls(this.camera);
     this.scene.add(this.controls.getObject());
 
+    this.mainScene = new MainScene(this.renderer, this.camera, this.scene, {});
+    this.mainScene.controlObject = this.controls.getObject();
+    this.mainScene.pitchObject = this.controls.pitchObject();
+
     $(document).click(() => {
       if (this.controls.requestPointerlock) {
         this.controls.requestPointerlock();
       }
       this.controls.enabled = true;
-    });
 
-    this.mainScene = new MainScene(this.renderer, this.camera, this.scene, {});
-    this.mainScene.controlObject = this.controls.getObject();
-    this.mainScene.pitchObject = this.controls.pitchObject();
+      this.mainScene.click();
+    });
   }
 
   createScene() {

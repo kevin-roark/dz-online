@@ -560,6 +560,7 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
     this.nextMediaToAddIndex = this.activeMeshCount; // we will layout 0 -> 665 in the constructor
     this.activeMeshes = [];
 
+    this.hasStarted = false;
     this.inSlowMotion = false;
     this.ascending = false;
 
@@ -576,11 +577,20 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
   _inherits(Hole, _GalleryLayout);
 
   _createClass(Hole, {
+    start: {
+      value: function start() {
+        this.hasStarted = true;
+      }
+    },
     update: {
       value: function update() {
         var _this = this;
 
         _get(Object.getPrototypeOf(Hole.prototype), "update", this).call(this);
+
+        if (!this.hasStarted) {
+          return;
+        }
 
         if (!this.hasReachedBottom) {
           // continue our descent
@@ -639,8 +649,14 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
         mesh.castShadow = true;
 
         if (this.fallThroughImages) {
-          mesh.rotation.x = -Math.PI / 2;
+          mesh.rotation.x = -Math.PI / 2; // flip downwards
+          mesh.rotation.y = Math.PI; // rightside up images
         }
+
+        ///these turn the camera wildly after it his 666 index.
+
+        //this.controlObject.rotation.y = this.turnControlObject(index);
+        //this.pitchObject.rotation.x = this.turnPitchObject(index);
 
         // cool stacky intersection way: this.yLevel - (index * repeatIndex * this.distanceBetweenPhotos)
         mesh.position.set(this.xPosition, this.yForMediaWithIndex(index), this.zPosition);
@@ -653,6 +669,18 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
       value: function yForMediaWithIndex(index) {
         var y = this.yLevel - index * this.distanceBetweenPhotos;
         return y;
+      }
+    },
+    turnControlObject: {
+      value: function turnControlObject(index) {
+        var yrotation = Math.PI * ((index - 665) / 50);
+        return yrotation;
+      }
+    },
+    turnPitchObject: {
+      value: function turnPitchObject(index) {
+        var xrotation = Math.PI * ((index - 665) / 50);
+        return xrotation;
       }
     },
     toggleSlowMotion: {
@@ -2910,6 +2938,9 @@ var SheenScene = require("./sheen-scene.es6").SheenScene;
 
 var Gallery = require("./gallery.es6").Gallery;
 
+var $splashStatus = $("#splash-status");
+var BaseLoadingText = "is loading";
+
 var MainScene = exports.MainScene = (function (_SheenScene) {
 
   /// Init
@@ -2932,14 +2963,15 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
       value: function enter() {
         _get(Object.getPrototypeOf(MainScene.prototype), "enter", this).call(this);
 
+        this.loading = true;
+        this.updateLoadingView();
+
         this.sound = new buzz.sound("/media/falling2", {
           formats: ["mp3"],
           webAudioApi: true,
           volume: 100
         });
-        buzz.defaults.duration = 500;
-
-        this.sound.loop().play().fadeIn();
+        buzz.defaults.duration = 50;
 
         this.makeLights();
 
@@ -2953,9 +2985,13 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
     },
     doTimedWork: {
       value: function doTimedWork() {
+        var _this = this;
+
         _get(Object.getPrototypeOf(MainScene.prototype), "doTimedWork", this).call(this);
 
-        this.david.create();
+        this.david.create(function () {
+          _this.galleryDidLoad();
+        });
       }
     },
     exit: {
@@ -2991,6 +3027,68 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
         if (this.david.layout) {
           this.david.layout.toggleSlowMotion();
         }
+      }
+    },
+    click: {
+      value: function click() {
+        if (this.loading || this.hasStarted) {
+          return;
+        }
+
+        this.start();
+      }
+    },
+    updateLoadingView: {
+      value: function updateLoadingView() {
+        var _this = this;
+
+        if (!this.loading) {
+          return;
+        }
+
+        var currentText = $splashStatus.text();
+        if (currentText.length < BaseLoadingText.length + 3) {
+          currentText += ".";
+          $splashStatus.text(currentText);
+        } else {
+          $splashStatus.text(BaseLoadingText);
+        }
+
+        setTimeout(function () {
+          _this.updateLoadingView();
+        }, 250);
+      }
+    },
+    galleryDidLoad: {
+      value: function galleryDidLoad() {
+        var _this = this;
+
+        this.loading = false;
+
+        $splashStatus.text("is ready");
+        $splashStatus.css("font-style", "italic");
+
+        setTimeout(function () {
+          if (!_this.hasStarted) {
+            $("#splash-controls").fadeIn(1000);
+          }
+        }, 250);
+        setTimeout(function () {
+          if (!_this.hasStarted) {
+            $("#click-to-start").fadeIn(1000);
+          }
+        }, 1750);
+      }
+    },
+    start: {
+      value: function start() {
+        $("#splash-overlay").fadeOut(1000);
+
+        this.sound.loop().play().fadeIn();
+
+        this.david.layout.start();
+
+        this.hasStarted = true;
       }
     },
     makeLights: {
@@ -3081,16 +3179,18 @@ var Sheen = (function (_ThreeBoiler) {
     this.controls = new FlyControls(this.camera);
     this.scene.add(this.controls.getObject());
 
+    this.mainScene = new MainScene(this.renderer, this.camera, this.scene, {});
+    this.mainScene.controlObject = this.controls.getObject();
+    this.mainScene.pitchObject = this.controls.pitchObject();
+
     $(document).click(function () {
       if (_this.controls.requestPointerlock) {
         _this.controls.requestPointerlock();
       }
       _this.controls.enabled = true;
-    });
 
-    this.mainScene = new MainScene(this.renderer, this.camera, this.scene, {});
-    this.mainScene.controlObject = this.controls.getObject();
-    this.mainScene.pitchObject = this.controls.pitchObject();
+      _this.mainScene.click();
+    });
   }
 
   _inherits(Sheen, _ThreeBoiler);

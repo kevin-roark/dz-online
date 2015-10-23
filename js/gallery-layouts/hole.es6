@@ -33,6 +33,7 @@ export class Hole extends GalleryLayout {
     this.nextMediaToAddIndex = this.activeMeshCount; // we will layout 0 -> 665 in the constructor
     this.activeMeshes = [];
 
+    this.hasStarted = false;
     this.inSlowMotion = false;
     this.ascending = false;
 
@@ -46,8 +47,16 @@ export class Hole extends GalleryLayout {
     this.pitchObject.rotation.x = -Math.PI / 2;
   }
 
+  start() {
+    this.hasStarted = true;
+  }
+
   update() {
     super.update();
+
+    if (!this.hasStarted) {
+      return;
+    }
 
     if (!this.hasReachedBottom) {
       // continue our descent
@@ -111,8 +120,14 @@ export class Hole extends GalleryLayout {
     mesh.castShadow = true;
 
     if (this.fallThroughImages) {
-      mesh.rotation.x = -Math.PI / 2;
+      mesh.rotation.x = -Math.PI / 2; // flip downwards
+      mesh.rotation.y = Math.PI; // rightside up images
     }
+
+    ///these turn the camera wildly after it his 666 index.
+
+    //this.controlObject.rotation.y = this.turnControlObject(index);
+    //this.pitchObject.rotation.x = this.turnPitchObject(index);
 
     // cool stacky intersection way: this.yLevel - (index * repeatIndex * this.distanceBetweenPhotos)
     mesh.position.set(this.xPosition, this.yForMediaWithIndex(index), this.zPosition);
@@ -124,6 +139,16 @@ export class Hole extends GalleryLayout {
   yForMediaWithIndex(index) {
     var y = this.yLevel - (index * this.distanceBetweenPhotos);
     return y;
+  }
+
+  turnControlObject(index) {
+      var yrotation = Math.PI * ((index-665)/50) ;
+      return yrotation
+  }
+
+  turnPitchObject(index) {
+      var xrotation = Math.PI * ((index-665)/50) ;
+      return xrotation
   }
 
   toggleSlowMotion() {

@@ -7,6 +7,9 @@ let kt = require('kutility');
 import {SheenScene} from './sheen-scene.es6';
 import {Gallery} from './gallery.es6';
 
+var $splashStatus = $('#splash-status');
+var BaseLoadingText = 'is loading';
+
 export class MainScene extends SheenScene {
 
   /// Init
@@ -22,14 +25,15 @@ export class MainScene extends SheenScene {
   enter() {
     super.enter();
 
+    this.loading = true;
+    this.updateLoadingView();
+
     this.sound = new buzz.sound('/media/falling2', {
       formats: ["mp3"],
       webAudioApi: true,
       volume: 100
     });
-    buzz.defaults.duration = 500;
-
-    this.sound.loop().play().fadeIn();
+    buzz.defaults.duration = 50;
 
     this.makeLights();
 
@@ -44,7 +48,9 @@ export class MainScene extends SheenScene {
   doTimedWork() {
     super.doTimedWork();
 
-    this.david.create();
+    this.david.create(() => {
+      this.galleryDidLoad();
+    });
   }
 
   exit() {
@@ -75,6 +81,61 @@ export class MainScene extends SheenScene {
     if (this.david.layout) {
       this.david.layout.toggleSlowMotion();
     }
+  }
+
+  click() {
+    if (this.loading || this.hasStarted) {
+      return;
+    }
+
+    this.start();
+  }
+
+  updateLoadingView() {
+    if (!this.loading) {
+      return;
+    }
+
+    var currentText = $splashStatus.text();
+    if (currentText.length < BaseLoadingText.length + 3) {
+      currentText += '.';
+      $splashStatus.text(currentText);
+    }
+    else {
+      $splashStatus.text(BaseLoadingText);
+    }
+
+    setTimeout(() => {
+      this.updateLoadingView();
+    }, 250);
+  }
+
+  galleryDidLoad() {
+    this.loading = false;
+
+    $splashStatus.text('is ready');
+    $splashStatus.css('font-style', 'italic');
+
+    setTimeout(() => {
+      if (!this.hasStarted) {
+        $('#splash-controls').fadeIn(1000);
+      }
+    }, 250);
+    setTimeout(() => {
+      if (!this.hasStarted) {
+        $('#click-to-start').fadeIn(1000);
+      }
+    }, 1750);
+  }
+
+  start() {
+    $('#splash-overlay').fadeOut(1000);
+
+    this.sound.loop().play().fadeIn();
+
+    this.david.layout.start();
+
+    this.hasStarted = true;
   }
 
   // Creation
