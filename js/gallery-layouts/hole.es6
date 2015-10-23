@@ -19,7 +19,7 @@ export class Hole extends GalleryLayout {
     this.thresholdVelocity = options.thresholdVelocity || -0.022;
     this.slowAcceleration = options.slowAcceleration || -0.00003;
     this.fastAcceleration = options.fastAcceleration || -0.0005; // good fun value is -0.0005
-    this.repeatCount = options.repeatCount || Math.round(1000 / options.media.length);
+    this.repeatCount = 1;
     this.fallThroughImages = options.fallThroughImages || true;
 
     super(options);

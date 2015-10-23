@@ -28,6 +28,8 @@ export class Gallery {
   create(callback) {
     var filename = '/data/dz_media.json';
     $.getJSON(filename, (data) => {
+      console.log(data);
+
       this.layout = this.layoutCreator({
         container: this.meshContainer,
         controlObject: this.controlObject,
