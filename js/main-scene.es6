@@ -7,25 +7,14 @@ let kt = require('kutility');
 import {SheenScene} from './sheen-scene.es6';
 import {Gallery} from './gallery.es6';
 
-let sound = new buzz.sound('/media/falling2', {
-    formats: [ "mp3"],
-    webAudioApi: true,
-    volume: 100
-  });
-
-
 export class MainScene extends SheenScene {
 
   /// Init
 
   constructor(renderer, camera, scene, options) {
     super(renderer, camera, scene, options);
-    buzz.defaults.duration = 500;
-    sound.loop().play().fadeIn();
-
 
     this.name = "Art Decade";
-
   }
 
   /// Overrides
@@ -33,10 +22,21 @@ export class MainScene extends SheenScene {
   enter() {
     super.enter();
 
+    this.sound = new buzz.sound('/media/falling2', {
+      formats: ["mp3"],
+      webAudioApi: true,
+      volume: 100
+    });
+    buzz.defaults.duration = 500;
+
+    this.sound.loop().play().fadeIn();
+
     this.makeLights();
 
     // make all the galleries here
-    this.david = new Gallery(this.scene, this.controlObject, {
+    this.david = new Gallery(this.scene, {
+      controlObject: this.controlObject,
+      pitchObject: this.pitchObject,
       yLevel: 0
     });
   }
@@ -66,6 +66,14 @@ export class MainScene extends SheenScene {
 
     if (this.david) {
       this.david.update();
+    }
+  }
+
+  // Interaction
+
+  spacebarPressed() {
+    if (this.david.layout) {
+      this.david.layout.toggleSlowMotion();
     }
   }
 

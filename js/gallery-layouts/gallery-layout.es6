@@ -9,6 +9,7 @@ export class GalleryLayout {
     this.container = options.container;
     this.media = options.media;
     this.controlObject = options.controlObject;
+    this.pitchObject = options.pitchObject;
 
     // optional config
     this.yLevel = options.yLevel || 0;

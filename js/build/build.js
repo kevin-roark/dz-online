@@ -45,6 +45,10 @@ module.exports = function (camera, options) {
 		return yawObject;
 	};
 
+	this.pitchObject = function () {
+		return pitchObject;
+	};
+
 	this.setEnabled = function (enabled) {
 		this.enabled = enabled;
 	};
@@ -476,6 +480,7 @@ var GalleryLayout = exports.GalleryLayout = (function () {
     this.container = options.container;
     this.media = options.media;
     this.controlObject = options.controlObject;
+    this.pitchObject = options.pitchObject;
 
     // optional config
     this.yLevel = options.yLevel || 0;
@@ -544,6 +549,8 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
     this.thresholdVelocity = options.thresholdVelocity || -0.031;
     this.slowAcceleration = options.slowAcceleration || -0.00003;
     this.fastAcceleration = options.fastAcceleration || -0.0005; // good fun value is -0.0005
+    this.slowMotionVelocity = options.slowMotionVelocity || -0.01;
+    this.ascensionVelocity = options.ascensionVelocity || 0.048;
 
     this.activeMeshCount = options.activeMeshCount || 666;
     this.halfActiveMeshCount = this.activeMeshCount / 2;
@@ -553,11 +560,17 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
     this.nextMediaToAddIndex = this.activeMeshCount; // we will layout 0 -> 665 in the constructor
     this.activeMeshes = [];
 
+    this.inSlowMotion = false;
+    this.ascending = false;
+
     // perform initial layout
     for (var i = 0; i < this.activeMeshCount; i++) {
       var media = this.media[i];
       this.layoutMedia(i, media);
     }
+
+    // face me down
+    this.pitchObject.rotation.x = -Math.PI / 2;
   }
 
   _inherits(Hole, _GalleryLayout);
@@ -565,16 +578,26 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
   _createClass(Hole, {
     update: {
       value: function update() {
+        var _this = this;
+
         _get(Object.getPrototypeOf(Hole.prototype), "update", this).call(this);
 
         if (!this.hasReachedBottom) {
-          if (this.downwardVelocity > this.thresholdVelocity) {
-            this.downwardVelocity += this.slowAcceleration;
-          } else {
-            this.downwardVelocity += this.fastAcceleration;
-          }
+          // continue our descent
+          if (!this.inSlowMotion) {
+            if (this.downwardVelocity > this.thresholdVelocity) {
+              this.downwardVelocity += this.slowAcceleration;
+            } else {
+              this.downwardVelocity += this.fastAcceleration;
+            }
 
-          this.controlObject.translateY(this.downwardVelocity);
+            this.controlObject.translateY(this.downwardVelocity);
+          } else {
+            this.controlObject.translateY(Math.max(this.slowMotionVelocity, this.downwardVelocity));
+          }
+        } else if (this.ascending) {
+          // permanently rise
+          this.controlObject.translateY(this.ascensionVelocity);
         }
 
         while (this.controlObject.position.y < this.nextMediaToPassPosition && !this.hasReachedBottom) {
@@ -594,6 +617,9 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
 
           if (this.nextMediaMeshToPassIndex >= this.media.length) {
             this.hasReachedBottom = true;
+            setTimeout(function () {
+              _this.ascending = true;
+            }, 3000); // wait 3 seconds at the bottom
           }
         }
       }
@@ -613,8 +639,7 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
         mesh.castShadow = true;
 
         if (this.fallThroughImages) {
-          mesh.rotation.x = Math.PI / 2;
-          mesh.rotation.y = Math.PI; // makes initial pictures right side up -- hopefully
+          mesh.rotation.x = -Math.PI / 2;
         }
 
         // cool stacky intersection way: this.yLevel - (index * repeatIndex * this.distanceBetweenPhotos)
@@ -628,6 +653,11 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
       value: function yForMediaWithIndex(index) {
         var y = this.yLevel - index * this.distanceBetweenPhotos;
         return y;
+      }
+    },
+    toggleSlowMotion: {
+      value: function toggleSlowMotion() {
+        this.inSlowMotion = !this.inSlowMotion;
       }
     }
   });
@@ -657,11 +687,12 @@ var geometryUtil = require("./geometry-util");
 var Hole = require("./gallery-layouts/hole.es6").Hole;
 
 var Gallery = exports.Gallery = (function () {
-  function Gallery(scene, controlObject, options) {
+  function Gallery(scene, options) {
     _classCallCheck(this, Gallery);
 
     this.scene = scene;
-    this.controlObject = controlObject;
+    this.controlObject = options.controlObject;
+    this.pitchObject = options.pitchObject;
     this.yLevel = options.yLevel || 0;
     this.layoutCreator = function (options) {
       return new Hole(options);
@@ -682,11 +713,12 @@ var Gallery = exports.Gallery = (function () {
 
         var filename = "/data/dz_media.json";
         $.getJSON(filename, function (data) {
-          console.log(data);
+          //console.log(data);
 
           _this.layout = _this.layoutCreator({
             container: _this.meshContainer,
             controlObject: _this.controlObject,
+            pitchObject: _this.pitchObject,
             media: data,
             yLevel: _this.yLevel
           });
@@ -2878,12 +2910,6 @@ var SheenScene = require("./sheen-scene.es6").SheenScene;
 
 var Gallery = require("./gallery.es6").Gallery;
 
-var sound = new buzz.sound("/media/falling2", {
-  formats: ["mp3"],
-  webAudioApi: true,
-  volume: 100
-});
-
 var MainScene = exports.MainScene = (function (_SheenScene) {
 
   /// Init
@@ -2892,8 +2918,6 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
     _classCallCheck(this, MainScene);
 
     _get(Object.getPrototypeOf(MainScene.prototype), "constructor", this).call(this, renderer, camera, scene, options);
-    buzz.defaults.duration = 500;
-    sound.loop().play().fadeIn();
 
     this.name = "Art Decade";
   }
@@ -2908,10 +2932,21 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
       value: function enter() {
         _get(Object.getPrototypeOf(MainScene.prototype), "enter", this).call(this);
 
+        this.sound = new buzz.sound("/media/falling2", {
+          formats: ["mp3"],
+          webAudioApi: true,
+          volume: 100
+        });
+        buzz.defaults.duration = 500;
+
+        this.sound.loop().play().fadeIn();
+
         this.makeLights();
 
         // make all the galleries here
-        this.david = new Gallery(this.scene, this.controlObject, {
+        this.david = new Gallery(this.scene, {
+          controlObject: this.controlObject,
+          pitchObject: this.pitchObject,
           yLevel: 0
         });
       }
@@ -2945,6 +2980,16 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
 
         if (this.david) {
           this.david.update();
+        }
+      }
+    },
+    spacebarPressed: {
+
+      // Interaction
+
+      value: function spacebarPressed() {
+        if (this.david.layout) {
+          this.david.layout.toggleSlowMotion();
         }
       }
     },
@@ -3045,6 +3090,7 @@ var Sheen = (function (_ThreeBoiler) {
 
     this.mainScene = new MainScene(this.renderer, this.camera, this.scene, {});
     this.mainScene.controlObject = this.controls.getObject();
+    this.mainScene.pitchObject = this.controls.pitchObject();
   }
 
   _inherits(Sheen, _ThreeBoiler);
@@ -3079,6 +3125,11 @@ var Sheen = (function (_ThreeBoiler) {
 
         this.controls.update();
         this.mainScene.update();
+      }
+    },
+    spacebarPressed: {
+      value: function spacebarPressed() {
+        this.mainScene.spacebarPressed();
       }
     }
   });
