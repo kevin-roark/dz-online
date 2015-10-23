@@ -544,6 +544,7 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
     this.thresholdVelocity = options.thresholdVelocity || -0.031;
     this.slowAcceleration = options.slowAcceleration || -0.00003;
     this.fastAcceleration = options.fastAcceleration || -0.0005; // good fun value is -0.0005
+    this.slowMotionVelocity = options.slowMotionVelocity || -0.01;
 
     this.activeMeshCount = options.activeMeshCount || 666;
     this.halfActiveMeshCount = this.activeMeshCount / 2;
@@ -552,6 +553,8 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
     this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaMeshToPassIndex);
     this.nextMediaToAddIndex = this.activeMeshCount; // we will layout 0 -> 665 in the constructor
     this.activeMeshes = [];
+
+    this.inSlowMotion = false;
 
     // perform initial layout
     for (var i = 0; i < this.activeMeshCount; i++) {
@@ -568,13 +571,17 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
         _get(Object.getPrototypeOf(Hole.prototype), "update", this).call(this);
 
         if (!this.hasReachedBottom) {
-          if (this.downwardVelocity > this.thresholdVelocity) {
-            this.downwardVelocity += this.slowAcceleration;
-          } else {
-            this.downwardVelocity += this.fastAcceleration;
-          }
+          if (!this.inSlowMotion) {
+            if (this.downwardVelocity > this.thresholdVelocity) {
+              this.downwardVelocity += this.slowAcceleration;
+            } else {
+              this.downwardVelocity += this.fastAcceleration;
+            }
 
-          this.controlObject.translateY(this.downwardVelocity);
+            this.controlObject.translateY(this.downwardVelocity);
+          } else {
+            this.controlObject.translateY(Math.max(this.slowMotionVelocity, this.downwardVelocity));
+          }
         }
 
         while (this.controlObject.position.y < this.nextMediaToPassPosition && !this.hasReachedBottom) {
@@ -629,6 +636,11 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
         var y = this.yLevel - index * this.distanceBetweenPhotos;
         return y;
       }
+    },
+    toggleSlowMotion: {
+      value: function toggleSlowMotion() {
+        this.inSlowMotion = !this.inSlowMotion;
+      }
     }
   });
 
@@ -682,7 +694,7 @@ var Gallery = exports.Gallery = (function () {
 
         var filename = "/data/dz_media.json";
         $.getJSON(filename, function (data) {
-          console.log(data);
+          //console.log(data);
 
           _this.layout = _this.layoutCreator({
             container: _this.meshContainer,
@@ -2878,12 +2890,6 @@ var SheenScene = require("./sheen-scene.es6").SheenScene;
 
 var Gallery = require("./gallery.es6").Gallery;
 
-var sound = new buzz.sound("/media/falling2", {
-  formats: ["mp3"],
-  webAudioApi: true,
-  volume: 100
-});
-
 var MainScene = exports.MainScene = (function (_SheenScene) {
 
   /// Init
@@ -2892,8 +2898,6 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
     _classCallCheck(this, MainScene);
 
     _get(Object.getPrototypeOf(MainScene.prototype), "constructor", this).call(this, renderer, camera, scene, options);
-    buzz.defaults.duration = 500;
-    sound.loop().play().fadeIn();
 
     this.name = "Art Decade";
   }
@@ -2907,6 +2911,15 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
 
       value: function enter() {
         _get(Object.getPrototypeOf(MainScene.prototype), "enter", this).call(this);
+
+        this.sound = new buzz.sound("/media/falling2", {
+          formats: ["mp3"],
+          webAudioApi: true,
+          volume: 100
+        });
+        buzz.defaults.duration = 500;
+
+        this.sound.loop().play().fadeIn();
 
         this.makeLights();
 
@@ -2945,6 +2958,16 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
 
         if (this.david) {
           this.david.update();
+        }
+      }
+    },
+    spacebarPressed: {
+
+      // Interaction
+
+      value: function spacebarPressed() {
+        if (this.david.layout) {
+          this.david.layout.toggleSlowMotion();
         }
       }
     },
@@ -3079,6 +3102,11 @@ var Sheen = (function (_ThreeBoiler) {
 
         this.controls.update();
         this.mainScene.update();
+      }
+    },
+    spacebarPressed: {
+      value: function spacebarPressed() {
+        this.mainScene.spacebarPressed();
       }
     }
   });

@@ -22,6 +22,7 @@ export class Hole extends GalleryLayout {
     this.thresholdVelocity = options.thresholdVelocity || -0.031;
     this.slowAcceleration = options.slowAcceleration || -0.00003;
     this.fastAcceleration = options.fastAcceleration || -0.0005; // good fun value is -0.0005
+    this.slowMotionVelocity = options.slowMotionVelocity || -0.01;
 
     this.activeMeshCount = options.activeMeshCount || 666;
     this.halfActiveMeshCount = this.activeMeshCount / 2;
@@ -30,6 +31,8 @@ export class Hole extends GalleryLayout {
     this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaMeshToPassIndex);
     this.nextMediaToAddIndex = this.activeMeshCount; // we will layout 0 -> 665 in the constructor
     this.activeMeshes = [];
+
+    this.inSlowMotion = false;
 
     // perform initial layout
     for (var i = 0; i < this.activeMeshCount; i++) {
@@ -42,14 +45,19 @@ export class Hole extends GalleryLayout {
     super.update();
 
     if (!this.hasReachedBottom) {
-      if (this.downwardVelocity > this.thresholdVelocity) {
-        this.downwardVelocity += this.slowAcceleration;
+      if (!this.inSlowMotion) {
+        if (this.downwardVelocity > this.thresholdVelocity) {
+          this.downwardVelocity += this.slowAcceleration;
+        }
+        else {
+          this.downwardVelocity += this.fastAcceleration;
+        }
+
+        this.controlObject.translateY(this.downwardVelocity);
       }
       else {
-        this.downwardVelocity += this.fastAcceleration;
+        this.controlObject.translateY(Math.max(this.slowMotionVelocity, this.downwardVelocity));
       }
-
-      this.controlObject.translateY(this.downwardVelocity);
     }
 
     while (this.controlObject.position.y < this.nextMediaToPassPosition && !this.hasReachedBottom) {
@@ -104,6 +112,10 @@ export class Hole extends GalleryLayout {
   yForMediaWithIndex(index) {
     var y = this.yLevel - (index * this.distanceBetweenPhotos);
     return y;
+  }
+
+  toggleSlowMotion() {
+    this.inSlowMotion = !this.inSlowMotion;
   }
 
 }

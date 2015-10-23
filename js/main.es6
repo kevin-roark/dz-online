@@ -63,6 +63,10 @@ class Sheen extends ThreeBoiler {
     this.controls.update();
     this.mainScene.update();
   }
+
+  spacebarPressed() {
+    this.mainScene.spacebarPressed();
+  }
 }
 
 $(function() {
