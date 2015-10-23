@@ -42,6 +42,10 @@ module.exports = function (camera, options) {
 		return yawObject;
 	};
 
+	this.pitchObject = function() {
+		return pitchObject;
+	};
+
 	this.setEnabled = function(enabled) {
 		this.enabled = enabled;
 	};
@@ -254,7 +258,7 @@ module.exports = function (camera, options) {
 			if (this.allowYMovement) {
 				yawObject.translateY( this.moveVector.y * moveMult );
 			}
-			
+
 			yawObject.translateZ( this.moveVector.z * moveMult );
 
 			if (this.keysAsRotation) {

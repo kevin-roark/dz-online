@@ -45,6 +45,10 @@ module.exports = function (camera, options) {
 		return yawObject;
 	};
 
+	this.pitchObject = function () {
+		return pitchObject;
+	};
+
 	this.setEnabled = function (enabled) {
 		this.enabled = enabled;
 	};
@@ -476,6 +480,7 @@ var GalleryLayout = exports.GalleryLayout = (function () {
     this.container = options.container;
     this.media = options.media;
     this.controlObject = options.controlObject;
+    this.pitchObject = options.pitchObject;
 
     // optional config
     this.yLevel = options.yLevel || 0;
@@ -563,6 +568,9 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
       var media = this.media[i];
       this.layoutMedia(i, media);
     }
+
+    // face me down
+    this.pitchObject.rotation.x = -Math.PI / 2;
   }
 
   _inherits(Hole, _GalleryLayout);
@@ -631,8 +639,7 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
         mesh.castShadow = true;
 
         if (this.fallThroughImages) {
-          mesh.rotation.x = Math.PI / 2;
-          mesh.rotation.y = Math.PI; // makes initial pictures right side up -- hopefully
+          mesh.rotation.x = -Math.PI / 2;
         }
 
         // cool stacky intersection way: this.yLevel - (index * repeatIndex * this.distanceBetweenPhotos)
@@ -680,11 +687,12 @@ var geometryUtil = require("./geometry-util");
 var Hole = require("./gallery-layouts/hole.es6").Hole;
 
 var Gallery = exports.Gallery = (function () {
-  function Gallery(scene, controlObject, options) {
+  function Gallery(scene, options) {
     _classCallCheck(this, Gallery);
 
     this.scene = scene;
-    this.controlObject = controlObject;
+    this.controlObject = options.controlObject;
+    this.pitchObject = options.pitchObject;
     this.yLevel = options.yLevel || 0;
     this.layoutCreator = function (options) {
       return new Hole(options);
@@ -710,6 +718,7 @@ var Gallery = exports.Gallery = (function () {
           _this.layout = _this.layoutCreator({
             container: _this.meshContainer,
             controlObject: _this.controlObject,
+            pitchObject: _this.pitchObject,
             media: data,
             yLevel: _this.yLevel
           });
@@ -2935,7 +2944,9 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
         this.makeLights();
 
         // make all the galleries here
-        this.david = new Gallery(this.scene, this.controlObject, {
+        this.david = new Gallery(this.scene, {
+          controlObject: this.controlObject,
+          pitchObject: this.pitchObject,
           yLevel: 0
         });
       }
@@ -3079,6 +3090,7 @@ var Sheen = (function (_ThreeBoiler) {
 
     this.mainScene = new MainScene(this.renderer, this.camera, this.scene, {});
     this.mainScene.controlObject = this.controls.getObject();
+    this.mainScene.pitchObject = this.controls.pitchObject();
   }
 
   _inherits(Sheen, _ThreeBoiler);

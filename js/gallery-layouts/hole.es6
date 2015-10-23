@@ -41,6 +41,9 @@ export class Hole extends GalleryLayout {
       var media = this.media[i];
       this.layoutMedia(i, media);
     }
+
+    // face me down
+    this.pitchObject.rotation.x = -Math.PI / 2;
   }
 
   update() {
@@ -108,8 +111,7 @@ export class Hole extends GalleryLayout {
     mesh.castShadow = true;
 
     if (this.fallThroughImages) {
-      mesh.rotation.x = Math.PI / 2;
-      mesh.rotation.y = Math.PI ; // makes initial pictures right side up -- hopefully
+      mesh.rotation.x = -Math.PI / 2;
     }
 
     // cool stacky intersection way: this.yLevel - (index * repeatIndex * this.distanceBetweenPhotos)

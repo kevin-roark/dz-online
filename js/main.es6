@@ -34,6 +34,7 @@ class Sheen extends ThreeBoiler {
 
     this.mainScene = new MainScene(this.renderer, this.camera, this.scene, {});
     this.mainScene.controlObject = this.controls.getObject();
+    this.mainScene.pitchObject = this.controls.pitchObject();
   }
 
   createScene() {

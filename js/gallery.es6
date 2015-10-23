@@ -11,9 +11,10 @@ import {Hole} from './gallery-layouts/hole.es6';
 
 export class Gallery {
 
-  constructor(scene, controlObject, options) {
+  constructor(scene, options) {
     this.scene = scene;
-    this.controlObject = controlObject;
+    this.controlObject = options.controlObject;
+    this.pitchObject = options.pitchObject;
     this.yLevel = options.yLevel || 0;
     this.layoutCreator = (options) => { return new Hole(options); };
 
@@ -33,6 +34,7 @@ export class Gallery {
       this.layout = this.layoutCreator({
         container: this.meshContainer,
         controlObject: this.controlObject,
+        pitchObject: this.pitchObject,
         media: data,
         yLevel: this.yLevel
       });

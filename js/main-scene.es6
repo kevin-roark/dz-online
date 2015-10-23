@@ -34,7 +34,9 @@ export class MainScene extends SheenScene {
     this.makeLights();
 
     // make all the galleries here
-    this.david = new Gallery(this.scene, this.controlObject, {
+    this.david = new Gallery(this.scene, {
+      controlObject: this.controlObject,
+      pitchObject: this.pitchObject,
       yLevel: 0
     });
   }
