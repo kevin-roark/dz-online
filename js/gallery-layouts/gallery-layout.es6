@@ -12,12 +12,6 @@ export class GalleryLayout {
 
     // optional config
     this.yLevel = options.yLevel || 0;
-
-    // perform initial layout
-    for (var i = 0; i < this.media.length; i++) {
-      var media = this.media[i];
-      this.layoutMedia(i, media);
-    }
   }
 
   update() {

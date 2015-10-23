@@ -9,36 +9,77 @@ import {GalleryLayout} from './gallery-layout.es6';
 export class Hole extends GalleryLayout {
 
   constructor(options) {
+    super(options);
+
     this.xPosition = options.xPosition || 0;
     this.zPosition = options.zPosition || 0;
     this.imageWidth = options.imageWidth || 20;
     this.imageDepth = options.imageDepth || 20;
+    this.fallThroughImages = options.fallThroughImages || true;
 
     this.distanceBetweenPhotos = options.distanceBetweenPhotos || 25;
     this.downwardVelocity = options.initialDownwardVelocity || -0.001;
     this.thresholdVelocity = options.thresholdVelocity || -0.022;
     this.slowAcceleration = options.slowAcceleration || -0.00003;
     this.fastAcceleration = options.fastAcceleration || -0.0005; // good fun value is -0.0005
-    this.repeatCount = 1;
-    this.fallThroughImages = options.fallThroughImages || true;
 
-    super(options);
+    this.activeMeshCount = options.activeMeshCount || 666;
+    this.halfActiveMeshCount = this.activeMeshCount / 2;
+    this.nextMediaMeshToPassIndex = 0;
+    this.hasReachedBottom = false;
+    this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaMeshToPassIndex);
+    this.nextMediaToAddIndex = this.activeMeshCount; // we will layout 0 -> 665 in the constructor
+    this.activeMeshes = [];
+
+    // perform initial layout
+    for (var i = 0; i < this.activeMeshCount; i++) {
+      var media = this.media[i];
+      this.layoutMedia(i, media);
+    }
   }
 
   update() {
     super.update();
 
-    if (this.downwardVelocity > this.thresholdVelocity) {
-      this.downwardVelocity += this.slowAcceleration;
-    }
-    else {
-      this.downwardVelocity += this.fastAcceleration;
+    if (!this.hasReachedBottom) {
+      if (this.downwardVelocity > this.thresholdVelocity) {
+        this.downwardVelocity += this.slowAcceleration;
+      }
+      else {
+        this.downwardVelocity += this.fastAcceleration;
+      }
+
+      this.controlObject.translateY(this.downwardVelocity);
     }
 
-    this.controlObject.translateY(this.downwardVelocity);
+    while (this.controlObject.position.y < this.nextMediaToPassPosition && !this.hasReachedBottom) {
+      if (this.nextMediaMeshToPassIndex > this.halfActiveMeshCount) {
+        // remove first item in array, the thing halfActiveMeshCount above me
+        var meshToRemove = this.activeMeshes.shift();
+        this.container.remove(meshToRemove);
+
+        // add the next media to the barrel
+        this.layoutMedia(this.nextMediaToAddIndex, this.media[this.nextMediaToAddIndex]);
+        this.nextMediaToAddIndex += 1;
+      }
+
+      this.nextMediaMeshToPassIndex += 1;
+      this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaMeshToPassIndex);
+      //console.log('my pass index is ' + this.nextMediaMeshToPassIndex);
+
+      if (this.nextMediaMeshToPassIndex >= this.media.length) {
+        this.hasReachedBottom = true;
+      }
+    }
   }
 
   layoutMedia(index, media) {
+    if (!media) {
+      return;
+    }
+
+    //console.log('laying out: ' + index);
+
     var width = this.imageWidth;
     var height = (media.thumbnail.width / media.thumbnail.height) * width;
     var mesh = new THREE.Mesh(
@@ -52,17 +93,16 @@ export class Hole extends GalleryLayout {
       mesh.rotation.x = Math.PI / 2;
     }
 
-    var distancePerChunk = this.media.length * this.distanceBetweenPhotos;
+    // cool stacky intersection way: this.yLevel - (index * repeatIndex * this.distanceBetweenPhotos)
+    mesh.position.set(this.xPosition, this.yForMediaWithIndex(index), this.zPosition);
 
-    for (var i = 0; i < this.repeatCount; i++) {
-      var mediaMesh = i === 0 ? mesh : mesh.clone();
+    this.container.add(mesh);
+    this.activeMeshes.push(mesh);
+  }
 
-      // cool stacky intersection way: this.yLevel - (index * i * this.distanceBetweenPhotos)
-      var y = this.yLevel - (i * distancePerChunk) - (index * this.distanceBetweenPhotos);
-      mediaMesh.position.set(this.xPosition, y, this.zPosition);
-
-      this.container.add(mediaMesh);
-    }
+  yForMediaWithIndex(index) {
+    var y = this.yLevel - (index * this.distanceBetweenPhotos);
+    return y;
   }
 
 }
