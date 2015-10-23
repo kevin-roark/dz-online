@@ -50,7 +50,7 @@ function main() {
 
   function handleResponse(res) {
     responseCount += 1;
-    console.log('handling chill response... this is number ' + responseCount + '...');
+    console.log('handling chill response... this is page ' + responseCount + '...');
 
     collectData(res.data);
     console.log('i now have this many... ' + mediaList.length);
@@ -68,7 +68,7 @@ function main() {
           else {
             setTimeout(function() {
               handleResponse(apiResponse.body);
-            }, 6666); // to get around rate-limiting make this artificially slow
+            }, 3666); // to get around rate-limiting make this artificially slow
           }
         });
     }

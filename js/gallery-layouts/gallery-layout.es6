@@ -12,12 +12,6 @@ export class GalleryLayout {
 
     // optional config
     this.yLevel = options.yLevel || 0;
-
-    // perform initial layout
-    for (var i = 0; i < this.media.length; i++) {
-      var media = this.media[i];
-      this.layoutMedia(i, media);
-    }
   }
 
   update() {
@@ -29,7 +23,7 @@ export class GalleryLayout {
   }
 
   createTexture(media) {
-    var imageURL = media.thumbnail.url;
+    var imageURL = media.type === 'image' ? media.media.url : media.thumbnail.url;
     var texture = imageUtil.loadTexture(imageURL, false);
     texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
     texture.minFilter = THREE.NearestFilter;
