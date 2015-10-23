@@ -10,6 +10,9 @@ instagramClient.init(secrets.INSTAGRAM_CLIENT_ID, secrets.INSTAGRAM_CLIENT_SECRE
 var locationToCrawl = '212943401';
 var outputFilename = './crawled_media.json';
 
+// global variables lol oops!
+var responseCount = 0;
+
 main();
 
 function writeFile(data, callback) {
@@ -46,8 +49,11 @@ function main() {
   });
 
   function handleResponse(res) {
-    console.log('handling chill response...');
+    responseCount += 1;
+    console.log('handling chill response... this is number ' + responseCount + '...');
+
     collectData(res.data);
+    console.log('i now have this many... ' + mediaList.length);
     writeFile(mediaList);
 
     var nextPageURL = res.pagination.next_url;
@@ -68,7 +74,6 @@ function main() {
     }
     else {
       console.log('I am all done!');
-      process.exit();
     }
   }
 
