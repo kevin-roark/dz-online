@@ -43,7 +43,7 @@ export class Hole extends GalleryLayout {
     }
 
     // face me down
-    this.pitchObject.rotation.x = -Math.PI / 2;
+    this.pitchObject.rotation.x = -Math.PI / 2 ;
   }
 
   update() {
@@ -99,7 +99,7 @@ export class Hole extends GalleryLayout {
       return;
     }
 
-    //console.log('laying out: ' + index);
+    console.log('laying out: ' + index);
 
     var width = this.imageWidth;
     var height = (media.thumbnail.width / media.thumbnail.height) * width;
@@ -114,6 +114,11 @@ export class Hole extends GalleryLayout {
       mesh.rotation.x = -Math.PI / 2;
     }
 
+    ///these turn the camera wildly after it his 666 index.
+    
+    //this.controlObject.rotation.y = this.turnControlObject(index);
+    //this.pitchObject.rotation.x = this.turnPitchObject(index);
+
     // cool stacky intersection way: this.yLevel - (index * repeatIndex * this.distanceBetweenPhotos)
     mesh.position.set(this.xPosition, this.yForMediaWithIndex(index), this.zPosition);
 
@@ -124,6 +129,16 @@ export class Hole extends GalleryLayout {
   yForMediaWithIndex(index) {
     var y = this.yLevel - (index * this.distanceBetweenPhotos);
     return y;
+  }
+
+  turnControlObject(index) {
+      var yrotation = Math.PI * ((index-665)/50) ;
+      return yrotation
+  }
+
+  turnPitchObject(index) {
+      var xrotation = Math.PI * ((index-665)/50) ;
+      return xrotation
   }
 
   toggleSlowMotion() {

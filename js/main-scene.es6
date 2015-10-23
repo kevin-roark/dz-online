@@ -27,7 +27,7 @@ export class MainScene extends SheenScene {
       webAudioApi: true,
       volume: 100
     });
-    buzz.defaults.duration = 500;
+    buzz.defaults.duration = 50;
 
     this.sound.loop().play().fadeIn();
 
