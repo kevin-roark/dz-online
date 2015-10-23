@@ -19,7 +19,7 @@ export class Hole extends GalleryLayout {
     this.yLevel = options.yLevel || -11;
     this.distanceBetweenPhotos = options.distanceBetweenPhotos || 25;
     this.downwardVelocity = options.initialDownwardVelocity || -0.001;
-    this.thresholdVelocity = options.thresholdVelocity || -0.029;
+    this.thresholdVelocity = options.thresholdVelocity || -0.031;
     this.slowAcceleration = options.slowAcceleration || -0.00003;
     this.fastAcceleration = options.fastAcceleration || -0.0005; // good fun value is -0.0005
 
@@ -91,6 +91,7 @@ export class Hole extends GalleryLayout {
 
     if (this.fallThroughImages) {
       mesh.rotation.x = Math.PI / 2;
+      mesh.rotation.y = Math.PI ; // makes initial pictures right side up -- hopefully
     }
 
     // cool stacky intersection way: this.yLevel - (index * repeatIndex * this.distanceBetweenPhotos)
