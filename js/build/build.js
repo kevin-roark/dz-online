@@ -560,8 +560,6 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
       value: function update() {
         _get(Object.getPrototypeOf(Hole.prototype), "update", this).call(this);
 
-        console.log(this.downwardVelocity);
-
         if (this.downwardVelocity > this.thresholdVelocity) {
           this.downwardVelocity += this.slowAcceleration;
         } else {

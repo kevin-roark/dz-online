@@ -28,8 +28,6 @@ export class Hole extends GalleryLayout {
   update() {
     super.update();
 
-    console.log(this.downwardVelocity);
-
     if (this.downwardVelocity > this.thresholdVelocity) {
       this.downwardVelocity += this.slowAcceleration;
     }
