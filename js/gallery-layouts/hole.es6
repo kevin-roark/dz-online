@@ -23,6 +23,7 @@ export class Hole extends GalleryLayout {
     this.slowAcceleration = options.slowAcceleration || -0.00003;
     this.fastAcceleration = options.fastAcceleration || -0.0005; // good fun value is -0.0005
     this.slowMotionVelocity = options.slowMotionVelocity || -0.01;
+    this.ascensionVelocity = options.ascensionVelocity || 0.048;
 
     this.activeMeshCount = options.activeMeshCount || 666;
     this.halfActiveMeshCount = this.activeMeshCount / 2;
@@ -33,6 +34,7 @@ export class Hole extends GalleryLayout {
     this.activeMeshes = [];
 
     this.inSlowMotion = false;
+    this.ascending = false;
 
     // perform initial layout
     for (var i = 0; i < this.activeMeshCount; i++) {
@@ -45,6 +47,7 @@ export class Hole extends GalleryLayout {
     super.update();
 
     if (!this.hasReachedBottom) {
+      // continue our descent
       if (!this.inSlowMotion) {
         if (this.downwardVelocity > this.thresholdVelocity) {
           this.downwardVelocity += this.slowAcceleration;
@@ -58,6 +61,10 @@ export class Hole extends GalleryLayout {
       else {
         this.controlObject.translateY(Math.max(this.slowMotionVelocity, this.downwardVelocity));
       }
+    }
+    else if (this.ascending) {
+      // permanently rise
+      this.controlObject.translateY(this.ascensionVelocity);
     }
 
     while (this.controlObject.position.y < this.nextMediaToPassPosition && !this.hasReachedBottom) {
@@ -77,6 +84,9 @@ export class Hole extends GalleryLayout {
 
       if (this.nextMediaMeshToPassIndex >= this.media.length) {
         this.hasReachedBottom = true;
+        setTimeout(() => {
+          this.ascending = true;
+        }, 3000); // wait 3 seconds at the bottom
       }
     }
   }

@@ -545,6 +545,7 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
     this.slowAcceleration = options.slowAcceleration || -0.00003;
     this.fastAcceleration = options.fastAcceleration || -0.0005; // good fun value is -0.0005
     this.slowMotionVelocity = options.slowMotionVelocity || -0.01;
+    this.ascensionVelocity = options.ascensionVelocity || 0.048;
 
     this.activeMeshCount = options.activeMeshCount || 666;
     this.halfActiveMeshCount = this.activeMeshCount / 2;
@@ -555,6 +556,7 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
     this.activeMeshes = [];
 
     this.inSlowMotion = false;
+    this.ascending = false;
 
     // perform initial layout
     for (var i = 0; i < this.activeMeshCount; i++) {
@@ -568,9 +570,12 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
   _createClass(Hole, {
     update: {
       value: function update() {
+        var _this = this;
+
         _get(Object.getPrototypeOf(Hole.prototype), "update", this).call(this);
 
         if (!this.hasReachedBottom) {
+          // continue our descent
           if (!this.inSlowMotion) {
             if (this.downwardVelocity > this.thresholdVelocity) {
               this.downwardVelocity += this.slowAcceleration;
@@ -582,6 +587,9 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
           } else {
             this.controlObject.translateY(Math.max(this.slowMotionVelocity, this.downwardVelocity));
           }
+        } else if (this.ascending) {
+          // permanently rise
+          this.controlObject.translateY(this.ascensionVelocity);
         }
 
         while (this.controlObject.position.y < this.nextMediaToPassPosition && !this.hasReachedBottom) {
@@ -601,6 +609,9 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
 
           if (this.nextMediaMeshToPassIndex >= this.media.length) {
             this.hasReachedBottom = true;
+            setTimeout(function () {
+              _this.ascending = true;
+            }, 3000); // wait 3 seconds at the bottom
           }
         }
       }
