@@ -33,6 +33,7 @@ export class Hole extends GalleryLayout {
     this.nextMediaToAddIndex = this.activeMeshCount; // we will layout 0 -> 665 in the constructor
     this.activeMeshes = [];
 
+    this.hasStarted = false;
     this.inSlowMotion = false;
     this.ascending = false;
 
@@ -46,8 +47,16 @@ export class Hole extends GalleryLayout {
     this.pitchObject.rotation.x = -Math.PI / 2;
   }
 
+  start() {
+    this.hasStarted = true;
+  }
+
   update() {
     super.update();
+
+    if (!this.hasStarted) {
+      return;
+    }
 
     if (!this.hasReachedBottom) {
       // continue our descent
@@ -111,7 +120,8 @@ export class Hole extends GalleryLayout {
     mesh.castShadow = true;
 
     if (this.fallThroughImages) {
-      mesh.rotation.x = -Math.PI / 2;
+      mesh.rotation.x = -Math.PI / 2; // flip downwards
+      mesh.rotation.y = Math.PI; // rightside up images
     }
 
     // cool stacky intersection way: this.yLevel - (index * repeatIndex * this.distanceBetweenPhotos)
