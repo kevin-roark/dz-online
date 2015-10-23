@@ -640,7 +640,7 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
           return;
         }
 
-        //console.log('laying out: ' + index);
+        console.log("laying out: " + index);
 
         var width = this.imageWidth;
         var height = media.thumbnail.width / media.thumbnail.height * width;
@@ -653,6 +653,11 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
           mesh.rotation.y = Math.PI; // rightside up images
         }
 
+        ///these turn the camera wildly after it his 666 index.
+
+        //this.controlObject.rotation.y = this.turnControlObject(index);
+        //this.pitchObject.rotation.x = this.turnPitchObject(index);
+
         // cool stacky intersection way: this.yLevel - (index * repeatIndex * this.distanceBetweenPhotos)
         mesh.position.set(this.xPosition, this.yForMediaWithIndex(index), this.zPosition);
 
@@ -664,6 +669,18 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
       value: function yForMediaWithIndex(index) {
         var y = this.yLevel - index * this.distanceBetweenPhotos;
         return y;
+      }
+    },
+    turnControlObject: {
+      value: function turnControlObject(index) {
+        var yrotation = Math.PI * ((index - 665) / 50);
+        return yrotation;
+      }
+    },
+    turnPitchObject: {
+      value: function turnPitchObject(index) {
+        var xrotation = Math.PI * ((index - 665) / 50);
+        return xrotation;
       }
     },
     toggleSlowMotion: {
@@ -2954,7 +2971,7 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
           webAudioApi: true,
           volume: 100
         });
-        buzz.defaults.duration = 500;
+        buzz.defaults.duration = 50;
 
         this.makeLights();
 
