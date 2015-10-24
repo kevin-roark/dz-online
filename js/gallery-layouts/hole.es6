@@ -25,7 +25,7 @@ export class Hole extends GalleryLayout {
     this.slowMotionVelocity = options.slowMotionVelocity || -0.01;
     this.ascensionVelocity = options.ascensionVelocity || 0.048;
 
-    this.activeMeshCount = options.activeMeshCount || 666;
+    this.activeMeshCount = options.activeMeshCount || 400;
     this.halfActiveMeshCount = this.activeMeshCount / 2;
     this.nextMediaMeshToPassIndex = 0;
     this.hasReachedBottom = false;
