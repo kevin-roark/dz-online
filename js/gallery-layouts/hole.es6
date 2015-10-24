@@ -24,6 +24,7 @@ export class Hole extends GalleryLayout {
     this.fastAcceleration = options.fastAcceleration || -0.0005; // good fun value is -0.0005
     this.slowMotionVelocity = options.slowMotionVelocity || -0.01;
     this.ascensionVelocity = options.ascensionVelocity || 0.048;
+    this.useBigCube = options.useBigCube || false;
 
     this.activeMeshCount = options.activeMeshCount || 400;
     this.halfActiveMeshCount = this.activeMeshCount / 2;
@@ -43,6 +44,15 @@ export class Hole extends GalleryLayout {
     for (var i = 0; i < this.activeMeshCount; i++) {
       var media = this.media[i];
       this.layoutMedia(i, media);
+    }
+
+    // big cube
+    if (this.useBigCube) {
+      this.bigCube = new THREE.Mesh(
+        new THREE.BoxGeometry(500, 500, 500),
+        this.bigCubeMaterial(this.media[0])
+      );
+      this.container.add(this.bigCube);
     }
 
     // face me down
@@ -81,6 +91,10 @@ export class Hole extends GalleryLayout {
       this.controlObject.translateY(this.ascensionVelocity);
     }
 
+    if (this.useBigCube) {
+      this.bigCube.position.y = this.controlObject.position.y;
+    }
+
     while (this.controlObject.position.y < this.nextMediaToPassPosition && !this.hasReachedBottom) {
       this.didPassMesh();
     }
@@ -107,6 +121,11 @@ export class Hole extends GalleryLayout {
     this.nextMediaMeshToPassIndex += 1;
     this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaMeshToPassIndex);
     //console.log('my pass index is ' + this.nextMediaMeshToPassIndex);
+
+    if (this.useBigCube) {
+      // update big cube with the current passing item
+      this.updateBigCubeTexture(this.media[this.nextMediaMeshToPassIndex]);
+    }
 
     if (this.nextMediaMeshToPassIndex >= this.media.length) {
       this.hasReachedBottom = true;
@@ -170,6 +189,31 @@ export class Hole extends GalleryLayout {
 
   toggleCrazyRotate() {
     this.goCrazyRotate = !this.goCrazyRotate;
+  }
+
+  updateBigCubeTexture(media) {
+    var material = this.bigCubeMaterial(media);
+    if (!material) return;
+
+    this.bigCube.material = material;
+    this.bigCube.needsUpdate = true;
+  }
+
+  bigCubeMaterial(media) {
+    if (!media) return null;
+    var texture = this.createTexture(media);
+    var material = new THREE.MeshBasicMaterial({map: texture, side: THREE.DoubleSide}); // want shiny? maybe l8r
+
+    var materials = [
+      material,         // Left side
+      material.clone(), // Right side
+      new THREE.MeshBasicMaterial({transparent: true, opacity: 0.0}), // Top side
+      new THREE.MeshBasicMaterial({transparent: true, opacity: 0.0}), // Bottom side
+      material.clone(), // Front side
+      material.clone()  // Back side
+    ];
+
+    return new THREE.MeshFaceMaterial(materials);
   }
 
 }
