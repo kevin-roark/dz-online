@@ -33,7 +33,7 @@ export class MainScene extends SheenScene {
       webAudioApi: true,
       volume: 100
     });
-    buzz.defaults.duration = 50;
+    buzz.defaults.duration = 2000;
 
     this.makeLights();
 
