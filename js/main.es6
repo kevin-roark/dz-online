@@ -71,11 +71,11 @@ class Sheen extends ThreeBoiler {
     super.keypress(keycode);
 
     switch (keycode) {
-      case 81:
+      case 113: /* q */
         this.mainScene.toggleCrazyRotation();
         break;
 
-      case 82:
+      case 114: /* r */
         this.mainScene.toggleSingleRotation();
         break;
     }

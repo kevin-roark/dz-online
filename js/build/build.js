@@ -586,8 +586,6 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
     },
     update: {
       value: function update() {
-        var _this = this;
-
         _get(Object.getPrototypeOf(Hole.prototype), "update", this).call(this);
 
         if (!this.hasStarted) {
@@ -613,26 +611,40 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
         }
 
         while (this.controlObject.position.y < this.nextMediaToPassPosition && !this.hasReachedBottom) {
-          if (this.nextMediaMeshToPassIndex > this.halfActiveMeshCount) {
-            // remove first item in array, the thing halfActiveMeshCount above me
-            var meshToRemove = this.activeMeshes.shift();
-            this.container.remove(meshToRemove);
+          this.didPassMesh();
+        }
+      }
+    },
+    didPassMesh: {
+      value: function didPassMesh() {
+        var _this = this;
 
-            // add the next media to the barrel
-            this.layoutMedia(this.nextMediaToAddIndex, this.media[this.nextMediaToAddIndex]);
-            this.nextMediaToAddIndex += 1;
-          }
+        // mesh management
+        if (this.nextMediaMeshToPassIndex > this.halfActiveMeshCount) {
+          // remove first item in array, the thing halfActiveMeshCount above me
+          var meshToRemove = this.activeMeshes.shift();
+          this.container.remove(meshToRemove);
 
-          this.nextMediaMeshToPassIndex += 1;
-          this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaMeshToPassIndex);
-          //console.log('my pass index is ' + this.nextMediaMeshToPassIndex);
+          // add the next media to the barrel
+          this.layoutMedia(this.nextMediaToAddIndex, this.media[this.nextMediaToAddIndex]);
+          this.nextMediaToAddIndex += 1;
+        }
 
-          if (this.nextMediaMeshToPassIndex >= this.media.length) {
-            this.hasReachedBottom = true;
-            setTimeout(function () {
-              _this.ascending = true;
-            }, 3000); // wait 3 seconds at the bottom
-          }
+        // turn the camera wildly
+        if (this.goCrazyRotate) {
+          this.turnControlObject(this.nextMediaMeshToPassIndex);
+          this.turnPitchObject(this.nextMediaMeshToPassIndex);
+        }
+
+        this.nextMediaMeshToPassIndex += 1;
+        this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaMeshToPassIndex);
+        //console.log('my pass index is ' + this.nextMediaMeshToPassIndex);
+
+        if (this.nextMediaMeshToPassIndex >= this.media.length) {
+          this.hasReachedBottom = true;
+          setTimeout(function () {
+            _this.ascending = true;
+          }, 3000); // wait 3 seconds at the bottom
         }
       }
     },
@@ -655,12 +667,6 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
           mesh.rotation.y = Math.PI; // rightside up images
         }
 
-        ///these turn the camera wildly after it his 666 index.
-        if (this.goCrazyRotate) {
-          this.controlObject.rotation.y = this.turnControlObject(index);
-          this.pitchObject.rotation.x = this.turnPitchObject(index);
-        }
-
         // cool stacky intersection way: this.yLevel - (index * repeatIndex * this.distanceBetweenPhotos)
         mesh.position.set(this.xPosition, this.yForMediaWithIndex(index), this.zPosition);
 
@@ -676,14 +682,14 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
     },
     turnControlObject: {
       value: function turnControlObject(index) {
-        var yrotation = Math.PI * ((index - 665) / 50);
-        return yrotation;
+        var yrotation = Math.PI * (index / 50);
+        this.controlObject.rotation.y = yrotation;
       }
     },
     turnPitchObject: {
       value: function turnPitchObject(index) {
-        var xrotation = Math.PI * ((index - 665) / 50);
-        return xrotation;
+        var xrotation = Math.PI * (index / 50);
+        this.pitchObject.rotation.x = xrotation;
       }
     },
     toggleSlowMotion: {
@@ -3260,11 +3266,13 @@ var Sheen = (function (_ThreeBoiler) {
         _get(Object.getPrototypeOf(Sheen.prototype), "keypress", this).call(this, keycode);
 
         switch (keycode) {
-          case 81:
+          case 113:
+            /* q */
             this.mainScene.toggleCrazyRotation();
             break;
 
-          case 82:
+          case 114:
+            /* r */
             this.mainScene.toggleSingleRotation();
             break;
         }

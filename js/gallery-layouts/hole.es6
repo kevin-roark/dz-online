@@ -82,26 +82,37 @@ export class Hole extends GalleryLayout {
     }
 
     while (this.controlObject.position.y < this.nextMediaToPassPosition && !this.hasReachedBottom) {
-      if (this.nextMediaMeshToPassIndex > this.halfActiveMeshCount) {
-        // remove first item in array, the thing halfActiveMeshCount above me
-        var meshToRemove = this.activeMeshes.shift();
-        this.container.remove(meshToRemove);
+      this.didPassMesh();
+    }
+  }
 
-        // add the next media to the barrel
-        this.layoutMedia(this.nextMediaToAddIndex, this.media[this.nextMediaToAddIndex]);
-        this.nextMediaToAddIndex += 1;
-      }
+  didPassMesh() {
+    // mesh management
+    if (this.nextMediaMeshToPassIndex > this.halfActiveMeshCount) {
+      // remove first item in array, the thing halfActiveMeshCount above me
+      var meshToRemove = this.activeMeshes.shift();
+      this.container.remove(meshToRemove);
 
-      this.nextMediaMeshToPassIndex += 1;
-      this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaMeshToPassIndex);
-      //console.log('my pass index is ' + this.nextMediaMeshToPassIndex);
+      // add the next media to the barrel
+      this.layoutMedia(this.nextMediaToAddIndex, this.media[this.nextMediaToAddIndex]);
+      this.nextMediaToAddIndex += 1;
+    }
 
-      if (this.nextMediaMeshToPassIndex >= this.media.length) {
-        this.hasReachedBottom = true;
-        setTimeout(() => {
-          this.ascending = true;
-        }, 3000); // wait 3 seconds at the bottom
-      }
+    // turn the camera wildly
+    if (this.goCrazyRotate) {
+      this.turnControlObject(this.nextMediaMeshToPassIndex);
+      this.turnPitchObject(this.nextMediaMeshToPassIndex);
+    }
+
+    this.nextMediaMeshToPassIndex += 1;
+    this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaMeshToPassIndex);
+    //console.log('my pass index is ' + this.nextMediaMeshToPassIndex);
+
+    if (this.nextMediaMeshToPassIndex >= this.media.length) {
+      this.hasReachedBottom = true;
+      setTimeout(() => {
+        this.ascending = true;
+      }, 3000); // wait 3 seconds at the bottom
     }
   }
 
@@ -126,13 +137,6 @@ export class Hole extends GalleryLayout {
       mesh.rotation.y = Math.PI; // rightside up images
     }
 
-    ///these turn the camera wildly after it his 666 index.
-     if(this.goCrazyRotate) {
-    this.controlObject.rotation.y = this.turnControlObject(index);
-    this.pitchObject.rotation.x = this.turnPitchObject(index);
-    }
-
-
     // cool stacky intersection way: this.yLevel - (index * repeatIndex * this.distanceBetweenPhotos)
     mesh.position.set(this.xPosition, this.yForMediaWithIndex(index), this.zPosition);
 
@@ -146,13 +150,13 @@ export class Hole extends GalleryLayout {
   }
 
   turnControlObject(index) {
-      var yrotation = Math.PI * ((index-665)/50) ;
-      return yrotation
+    var yrotation = Math.PI * (index / 50);
+    this.controlObject.rotation.y = yrotation;
   }
 
   turnPitchObject(index) {
-      var xrotation = Math.PI * ((index-665)/50) ;
-      return xrotation
+    var xrotation = Math.PI * (index / 50);
+    this.pitchObject.rotation.x = xrotation;
   }
 
   toggleSlowMotion() {
