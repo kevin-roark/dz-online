@@ -148,6 +148,22 @@ export class MainScene extends SheenScene {
     this.david.layout.start();
 
     this.hasStarted = true;
+
+    // after 90 seconds show the first key hint
+    setTimeout(function() {
+      $('#key-hint-1').fadeIn(666);
+      setTimeout(function() {
+        $('#key-hint-1').fadeOut(666);
+      }, 5000);
+    }, 90 * 1000);
+
+    // after 4 minutes show the second key hint
+    setTimeout(() => {
+      $('#key-hint-2').fadeIn(666);
+      setTimeout(function() {
+        $('#key-hint-2').fadeOut(666);
+      }, 5000);
+    }, 4 * 60 * 1000);
   }
 
   // Creation
