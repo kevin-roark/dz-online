@@ -35,6 +35,8 @@ export class Hole extends GalleryLayout {
 
     this.hasStarted = false;
     this.inSlowMotion = false;
+    this.goRotateOnce = false;
+    this.goCrazyRotate = false;
     this.ascending = false;
 
     // perform initial layout
@@ -125,9 +127,11 @@ export class Hole extends GalleryLayout {
     }
 
     ///these turn the camera wildly after it his 666 index.
-
-    //this.controlObject.rotation.y = this.turnControlObject(index);
-    //this.pitchObject.rotation.x = this.turnPitchObject(index);
+    /* if( this.goRotateOnce) {
+    this.controlObject.rotation.y = this.turnControlObject(index);
+    this.pitchObject.rotation.x = this.turnPitchObject(index);
+    }
+    */
 
     // cool stacky intersection way: this.yLevel - (index * repeatIndex * this.distanceBetweenPhotos)
     mesh.position.set(this.xPosition, this.yForMediaWithIndex(index), this.zPosition);
@@ -153,6 +157,16 @@ export class Hole extends GalleryLayout {
 
   toggleSlowMotion() {
     this.inSlowMotion = !this.inSlowMotion;
+  }
+
+/*  toggleRotateOnce() {
+    this.pitchObject.rotation.x = this.pitchObject.rotation.x - Math.PI / 2;
+  }
+
+*/
+
+  toggleCrazyRotate() {
+    this.goCrazyRotate = !this.goCrazyRotate;
   }
 
 }

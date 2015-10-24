@@ -83,6 +83,19 @@ export class MainScene extends SheenScene {
     }
   }
 
+/*  keypress(82) {
+    if (this.david.layout) {
+      this.david.layout.toggleRotateOnce();
+    }
+  }
+
+  keypress(81) {
+    if (this.david.layout) {
+      this.david.layout.toggleCrazyRotate();
+    }
+  }
+*/
+
   click() {
     if (this.loading || this.hasStarted) {
       return;

@@ -562,6 +562,8 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
 
     this.hasStarted = false;
     this.inSlowMotion = false;
+    this.goRotateOnce = false;
+    this.goCrazyRotate = false;
     this.ascending = false;
 
     // perform initial layout
@@ -654,9 +656,11 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
         }
 
         ///these turn the camera wildly after it his 666 index.
-
-        //this.controlObject.rotation.y = this.turnControlObject(index);
-        //this.pitchObject.rotation.x = this.turnPitchObject(index);
+        /* if( this.goRotateOnce) {
+        this.controlObject.rotation.y = this.turnControlObject(index);
+        this.pitchObject.rotation.x = this.turnPitchObject(index);
+        }
+        */
 
         // cool stacky intersection way: this.yLevel - (index * repeatIndex * this.distanceBetweenPhotos)
         mesh.position.set(this.xPosition, this.yForMediaWithIndex(index), this.zPosition);
@@ -686,6 +690,18 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
     toggleSlowMotion: {
       value: function toggleSlowMotion() {
         this.inSlowMotion = !this.inSlowMotion;
+      }
+    },
+    toggleCrazyRotate: {
+
+      /*  toggleRotateOnce() {
+          this.pitchObject.rotation.x = this.pitchObject.rotation.x - Math.PI / 2;
+        }
+      
+      */
+
+      value: function toggleCrazyRotate() {
+        this.goCrazyRotate = !this.goCrazyRotate;
       }
     }
   });
@@ -3030,6 +3046,20 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
       }
     },
     click: {
+
+      /*  keypress(82) {
+          if (this.david.layout) {
+            this.david.layout.toggleRotateOnce();
+          }
+        }
+      
+        keypress(81) {
+          if (this.david.layout) {
+            this.david.layout.toggleCrazyRotate();
+          }
+        }
+      */
+
       value: function click() {
         if (this.loading || this.hasStarted) {
           return;
@@ -3231,6 +3261,17 @@ var Sheen = (function (_ThreeBoiler) {
       value: function spacebarPressed() {
         this.mainScene.spacebarPressed();
       }
+
+      /*  keypress(82)  {
+       this.mainScene.keypress(82);
+       }
+      
+      
+       keypress(82)  {
+       this.mainScene.keypress(81);
+       }
+       */
+
     }
   });
 

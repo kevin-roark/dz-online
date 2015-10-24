@@ -70,7 +70,21 @@ class Sheen extends ThreeBoiler {
   spacebarPressed() {
     this.mainScene.spacebarPressed();
   }
+
+ /*  keypress(82)  {
+  this.mainScene.keypress(82);
+  }
+
+
+  keypress(82)  {
+  this.mainScene.keypress(81);
+  }
+  */
+
 }
+
+
+
 
 $(function() {
   var sheen = new Sheen();
