@@ -15,6 +15,10 @@ class Sheen extends ThreeBoiler {
       alpha: true
     });
 
+    if (/Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+      return;
+    }
+
     this.renderer.shadowMapEnabled = true;
     this.renderer.shadowMapCullFace = THREE.CullFaceBack;
     this.renderer.shadowMapType = THREE.PCFSoftShadowMap;
@@ -55,6 +59,10 @@ class Sheen extends ThreeBoiler {
   activate() {
     super.activate();
 
+    if (!this.mainScene) {
+      return;
+    }
+
     this.scene.simulate();
 
     this.mainScene.startScene();
@@ -62,6 +70,10 @@ class Sheen extends ThreeBoiler {
 
   render() {
     super.render();
+
+    if (!this.mainScene) {
+      return;
+    }
 
     this.controls.update();
     this.mainScene.update();

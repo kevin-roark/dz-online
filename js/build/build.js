@@ -3203,6 +3203,10 @@ var Sheen = (function (_ThreeBoiler) {
       alpha: true
     });
 
+    if (/Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+      return;
+    }
+
     this.renderer.shadowMapEnabled = true;
     this.renderer.shadowMapCullFace = THREE.CullFaceBack;
     this.renderer.shadowMapType = THREE.PCFSoftShadowMap;
@@ -3248,6 +3252,10 @@ var Sheen = (function (_ThreeBoiler) {
       value: function activate() {
         _get(Object.getPrototypeOf(Sheen.prototype), "activate", this).call(this);
 
+        if (!this.mainScene) {
+          return;
+        }
+
         this.scene.simulate();
 
         this.mainScene.startScene();
@@ -3256,6 +3264,10 @@ var Sheen = (function (_ThreeBoiler) {
     render: {
       value: function render() {
         _get(Object.getPrototypeOf(Sheen.prototype), "render", this).call(this);
+
+        if (!this.mainScene) {
+          return;
+        }
 
         this.controls.update();
         this.mainScene.update();
