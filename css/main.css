@@ -52,6 +52,15 @@ body {
 
 /** David Zwirnher CSS */
 
+a {
+  color: rgba(0, 125, 255, 0.87);
+  text-decoration: none;
+}
+  a:hover, a:focus {
+    text-decoration: underline;
+    font-style: italic;
+  }
+
 #mobile-error-overlay {
   display: none;
   position: fixed; top: 0; left: 0; bottom: 0; right: 0; z-index: 2000; overflow-y: auto;
@@ -61,14 +70,6 @@ body {
   #mobile-error-overlay p {
     padding: 50px 50px 50px 50px;
   }
-  #mobile-error-overlay a {
-    color: rgba(0, 125, 255, 0.87);
-    text-decoration: none;
-  }
-    #mobile-error-overlay a:hover, #mobile-error-overlay a:focus {
-      text-decoration: underline;
-      font-style: italic;
-    }
   #mobile-error-image {
     display: block; margin: 20px 0px 20px 0px;
   }
@@ -111,4 +112,8 @@ body {
   #click-to-start {
     display: none;
     font-size: 32px;
+  }
+  #subsidiaries {
+    position: absolute; bottom: 20px; right: 20px;
+    text-align: right;
   }

@@ -38,7 +38,11 @@ class Sheen extends ThreeBoiler {
     this.mainScene.controlObject = this.controls.getObject();
     this.mainScene.pitchObject = this.controls.pitchObject();
 
-    $(document).click(() => {
+    $(document).click((ev) => {
+      if ($(ev.target).is('a')) {
+        return;
+      }
+
       if (this.controls.requestPointerlock) {
         this.controls.requestPointerlock();
       }

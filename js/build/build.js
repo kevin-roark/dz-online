@@ -3242,7 +3242,11 @@ var Sheen = (function (_ThreeBoiler) {
     this.mainScene.controlObject = this.controls.getObject();
     this.mainScene.pitchObject = this.controls.pitchObject();
 
-    $(document).click(function () {
+    $(document).click(function (ev) {
+      if ($(ev.target).is("a")) {
+        return;
+      }
+
       if (_this.controls.requestPointerlock) {
         _this.controls.requestPointerlock();
       }
@@ -3572,7 +3576,7 @@ var SheenScene = exports.SheenScene = (function () {
 
     this.domContainer = $("body");
 
-    this.domContainer.click(this.click.bind(this));
+    // TODO: LOL ? this.domContainer.click(this.click.bind(this));
     $(window).resize(this.resize.bind(this));
 
     this.hasStarted = false;

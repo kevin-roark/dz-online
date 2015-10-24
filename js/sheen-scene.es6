@@ -13,7 +13,7 @@ export class SheenScene {
 
     this.domContainer = $('body');
 
-    this.domContainer.click(this.click.bind(this));
+    // TODO: LOL ? this.domContainer.click(this.click.bind(this));
     $(window).resize(this.resize.bind(this));
 
     this.hasStarted = false;
