@@ -3207,6 +3207,11 @@ var Sheen = (function (_ThreeBoiler) {
       return;
     }
 
+    var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+    if (!isChrome || true) {
+      $("#splash-please-use-chrome").show();
+    }
+
     this.renderer.shadowMapEnabled = true;
     this.renderer.shadowMapCullFace = THREE.CullFaceBack;
     this.renderer.shadowMapType = THREE.PCFSoftShadowMap;
