@@ -67,24 +67,25 @@ class Sheen extends ThreeBoiler {
     this.mainScene.update();
   }
 
+  keypress(keycode) {
+    super.keypress(keycode);
+
+    switch (keycode) {
+      case 81:
+        this.mainScene.toggleCrazyRotation();
+        break;
+
+      case 82:
+        this.mainScene.toggleSingleRotation();
+        break;
+    }
+  }
+
   spacebarPressed() {
     this.mainScene.spacebarPressed();
   }
 
- /*  keypress(82)  {
-  this.mainScene.keypress(82);
-  }
-
-
-  keypress(82)  {
-  this.mainScene.keypress(81);
-  }
-  */
-
 }
-
-
-
 
 $(function() {
   var sheen = new Sheen();

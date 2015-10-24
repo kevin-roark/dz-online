@@ -159,11 +159,9 @@ export class Hole extends GalleryLayout {
     this.inSlowMotion = !this.inSlowMotion;
   }
 
-/*  toggleRotateOnce() {
+  toggleRotateOnce() {
     this.pitchObject.rotation.x = this.pitchObject.rotation.x - Math.PI / 2;
   }
-
-*/
 
   toggleCrazyRotate() {
     this.goCrazyRotate = !this.goCrazyRotate;

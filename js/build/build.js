@@ -692,14 +692,12 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
         this.inSlowMotion = !this.inSlowMotion;
       }
     },
+    toggleRotateOnce: {
+      value: function toggleRotateOnce() {
+        this.pitchObject.rotation.x = this.pitchObject.rotation.x - Math.PI / 2;
+      }
+    },
     toggleCrazyRotate: {
-
-      /*  toggleRotateOnce() {
-          this.pitchObject.rotation.x = this.pitchObject.rotation.x - Math.PI / 2;
-        }
-      
-      */
-
       value: function toggleCrazyRotate() {
         this.goCrazyRotate = !this.goCrazyRotate;
       }
@@ -3045,21 +3043,21 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
         }
       }
     },
+    toggleSingleRotation: {
+      value: function toggleSingleRotation() {
+        if (this.david.layout) {
+          this.david.layout.toggleRotateOnce();
+        }
+      }
+    },
+    toggleCrazyRotation: {
+      value: function toggleCrazyRotation() {
+        if (this.david.layout) {
+          this.david.layout.toggleCrazyRotate();
+        }
+      }
+    },
     click: {
-
-      /*  keypress(82) {
-          if (this.david.layout) {
-            this.david.layout.toggleRotateOnce();
-          }
-        }
-      
-        keypress(81) {
-          if (this.david.layout) {
-            this.david.layout.toggleCrazyRotate();
-          }
-        }
-      */
-
       value: function click() {
         if (this.loading || this.hasStarted) {
           return;
@@ -3257,21 +3255,25 @@ var Sheen = (function (_ThreeBoiler) {
         this.mainScene.update();
       }
     },
+    keypress: {
+      value: function keypress(keycode) {
+        _get(Object.getPrototypeOf(Sheen.prototype), "keypress", this).call(this, keycode);
+
+        switch (keycode) {
+          case 81:
+            this.mainScene.toggleCrazyRotation();
+            break;
+
+          case 82:
+            this.mainScene.toggleSingleRotation();
+            break;
+        }
+      }
+    },
     spacebarPressed: {
       value: function spacebarPressed() {
         this.mainScene.spacebarPressed();
       }
-
-      /*  keypress(82)  {
-       this.mainScene.keypress(82);
-       }
-      
-      
-       keypress(82)  {
-       this.mainScene.keypress(81);
-       }
-       */
-
     }
   });
 
