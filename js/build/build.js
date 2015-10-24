@@ -656,11 +656,10 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
         }
 
         ///these turn the camera wildly after it his 666 index.
-        /* if( this.goRotateOnce) {
-        this.controlObject.rotation.y = this.turnControlObject(index);
-        this.pitchObject.rotation.x = this.turnPitchObject(index);
+        if (this.goCrazyRotate) {
+          this.controlObject.rotation.y = this.turnControlObject(index);
+          this.pitchObject.rotation.x = this.turnPitchObject(index);
         }
-        */
 
         // cool stacky intersection way: this.yLevel - (index * repeatIndex * this.distanceBetweenPhotos)
         mesh.position.set(this.xPosition, this.yForMediaWithIndex(index), this.zPosition);
@@ -694,7 +693,8 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
     },
     toggleRotateOnce: {
       value: function toggleRotateOnce() {
-        this.pitchObject.rotation.x = this.pitchObject.rotation.x - Math.PI / 2;
+        var oldval = this.pitchObject.rotation.x;
+        this.pitchObject.rotation.x = oldval - Math.PI / 2;
       }
     },
     toggleCrazyRotate: {
@@ -3112,7 +3112,7 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
       value: function start() {
         $("#splash-overlay").fadeOut(1000);
 
-        this.sound.loop().play().fadeIn();
+        this.sound.loop().play().fadeIn().fadeOut();
 
         this.david.layout.start();
 

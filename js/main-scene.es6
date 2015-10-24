@@ -143,7 +143,7 @@ export class MainScene extends SheenScene {
   start() {
     $('#splash-overlay').fadeOut(1000);
 
-    this.sound.loop().play().fadeIn();
+    this.sound.loop().play().fadeIn().fadeOut();
 
     this.david.layout.start();
 
