@@ -3208,7 +3208,7 @@ var Sheen = (function (_ThreeBoiler) {
     }
 
     var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
-    if (!isChrome || true) {
+    if (!isChrome) {
       $("#splash-please-use-chrome").show();
     }
 
