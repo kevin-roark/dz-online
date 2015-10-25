@@ -28,7 +28,7 @@ export class MainScene extends SheenScene {
     this.loading = true;
     this.updateLoadingView();
 
-    this.sound = new buzz.sound('/media/falling2', {
+    this.sound = new buzz.sound('/media/falling3', {
       formats: ["mp3"],
       webAudioApi: true,
       volume: 100
