@@ -1,4 +1,3 @@
-
 let THREE = require('three');
 let $ = require('jquery');
 import {GalleryLayout} from './gallery-layout.es6';
@@ -29,7 +28,8 @@ export class Hole extends GalleryLayout {
     this.bigCubeStyle = options.bigCubeStyle || 'none';
     this.bigCubeCount = options.bigCubeCount || 26;
     this.bigCubeLength = options.bigCubeLength || 500;
-    this.cycleMultiplier = options.cycleMultiplier || 5; // 20-25 keeps up with images, 1 starts from beginning like old v1; if value is too high you can run out of images after many toggles.
+    this.cycleMultiplier = options.cycleMultiplier || 25; // 20-25 keeps up with images, 1 starts from beginning like old v1; if value is too high you can run out of images after many toggles.
+    this.CubeToggleCount = options.CubeToggleCount || 0; // Used this for some testing -- might be helpful in the future
 
     this.activeMeshCount = options.activeMeshCount || 400;
     this.halfActiveMeshCount = this.activeMeshCount / 2;
@@ -227,6 +227,7 @@ export class Hole extends GalleryLayout {
   toggleBigCube() {
     if (this.bigCubeStyle === 'singleStack') {
       this.bigCubeStyle = 'layer';
+      this.CubeToggleCount = this.CubeToggleCount + 1;
     }
     else if (this.bigCubeStyle === 'layer') {
       this.bigCubeStyle = 'none';
@@ -246,7 +247,7 @@ export class Hole extends GalleryLayout {
       this.childStackingBigCubes = [];
       for (var i = 1; i < this.bigCubeCount; i++) {
         var cube = (i == 1) ? this.createBigCube(this.media[this.nextMediaToPassIndex]) : this.childStackingBigCubes[0].clone();
-        cube.position.y = - i * this.bigCubeLength;
+        cube.position.y = -i * this.bigCubeLength;
         this.topStackingBigCube.add(cube);
         this.childStackingBigCubes.push(cube);
       }
@@ -261,7 +262,7 @@ export class Hole extends GalleryLayout {
       this.bigLayeredCubes = [];
 
       for (var i = 0; i < (this.bigCubeCount / 2); i++) {
-        var belowIndex = (i + this.nextMediaToPassIndex) * this.cycleMultiplier;
+        var belowIndex = (i + this.nextMediaToPassIndex) + (i * this.cycleMultiplier);
         if (belowIndex < this.media.length) {
           var bigMesh = this.createBigCube(this.media[belowIndex]);
           bigMesh.position.set(this.xPosition, (this.controlObject.position.y || 0) + (i * -500), this.zPosition);
@@ -270,7 +271,7 @@ export class Hole extends GalleryLayout {
         }
 
         if (i > 0) {
-          var aboveIndex = (this.nextMediaToPassIndex - i) * this.cycleMultiplier;
+          var aboveIndex = (this.nextMediaToPassIndex - i) + (i * this.cycleMultiplier);
           if (aboveIndex >= 0) {
             var bigMesh = this.createBigCube(this.media[aboveIndex]);
             bigMesh.position.set(this.xPosition, (this.controlObject.position.y || 0) + (i * 500), this.zPosition);
