@@ -27,7 +27,7 @@ export class Hole extends GalleryLayout {
     this.slowMotionVelocity = options.slowMotionVelocity || -0.01;
     this.ascensionVelocity = options.ascensionVelocity || 0.048;
     this.bigCubeStyle = options.bigCubeStyle || 'none';
-    this.bigCubeCount = options.bigCubeCount || 20;
+    this.bigCubeCount = options.bigCubeCount || 26;
     this.bigCubeLength = options.bigCubeLength || 500;
 
     this.activeMeshCount = options.activeMeshCount || 400;
@@ -245,7 +245,7 @@ export class Hole extends GalleryLayout {
       this.childStackingBigCubes = [];
       for (var i = 1; i < this.bigCubeCount; i++) {
         var cube = (i == 1) ? this.createBigCube(this.media[this.nextMediaToPassIndex]) : this.childStackingBigCubes[0].clone();
-        cube.position.y = - i * this.bigCubeLength;
+        cube.position.y = - i * (this.bigCubeLength;
         this.topStackingBigCube.add(cube);
         this.childStackingBigCubes.push(cube);
       }
@@ -259,8 +259,8 @@ export class Hole extends GalleryLayout {
     if (this.bigCubeStyle === 'layer') {
       this.bigLayeredCubes = [];
 
-      for (var i = 0; i < this.bigCubeCount / 2; i++) {
-        var belowIndex = (i + this.nextMediaToPassIndex) * 25;
+      for (var i = 0; i < (this.bigCubeCount / 2); i++) {
+        var belowIndex = (i + this.nextMediaToPassIndex) * 20;
         if (belowIndex < this.media.length) {
           var bigMesh = this.createBigCube(this.media[belowIndex]);
           bigMesh.position.set(this.xPosition, (this.controlObject.position.y || 0) + (i * -500), this.zPosition);
@@ -269,7 +269,7 @@ export class Hole extends GalleryLayout {
         }
 
         if (i > 0) {
-          var aboveIndex = (this.nextMediaToPassIndex - i) * 25;
+          var aboveIndex = (this.nextMediaToPassIndex - i) * 20;
           if (aboveIndex >= 0) {
             var bigMesh = this.createBigCube(this.media[aboveIndex]);
             bigMesh.position.set(this.xPosition, (this.controlObject.position.y || 0) + (i * 500), this.zPosition);
