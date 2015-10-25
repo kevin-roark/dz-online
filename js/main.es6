@@ -15,10 +15,6 @@ class Sheen extends ThreeBoiler {
       alpha: true
     });
 
-    if (/Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-      return;
-    }
-
     var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
     if (!isChrome) {
       $('#splash-please-use-chrome').show();

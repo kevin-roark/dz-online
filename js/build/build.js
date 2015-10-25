@@ -525,6 +525,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var THREE = require("three");
+var $ = require("jquery");
 
 var GalleryLayout = require("./gallery-layout.es6").GalleryLayout;
 
@@ -538,6 +539,7 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
 
     _get(Object.getPrototypeOf(Hole.prototype), "constructor", this).call(this, options);
 
+    this.domMode = options.domMode || false;
     this.xPosition = options.xPosition || 0;
     this.zPosition = options.zPosition || 0;
     this.imageWidth = options.imageWidth || 20;
@@ -569,18 +571,22 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
     this.goCrazyRotate = false;
     this.ascending = false;
 
-    // big cube
-    // one fucked up way to get the stacked single-image cube is just to blast its length to length * count
-    this.handleBigCubeState();
+    if (!this.domMode) {
+      // one fucked up way to get the stacked single-image cube is just to blast its length to length * count
+      this.handleBigCubeState();
 
-    // perform initial layout
-    for (var i = 0; i < this.activeMeshCount; i++) {
-      var media = this.media[i];
-      this.layoutMedia(i, media);
+      // perform initial layout
+      for (var i = 0; i < this.activeMeshCount; i++) {
+        var media = this.media[i];
+        this.layoutMedia(i, media);
+      }
+
+      // face me down
+      this.pitchObject.rotation.x = -Math.PI / 2;
+    } else {
+      this.fullScreenImage = $("<img style=\"display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: red; z-index: 1000\"></img>");
+      $("body").append(this.fullScreenImage);
     }
-
-    // face me down
-    this.pitchObject.rotation.x = -Math.PI / 2;
   }
 
   _inherits(Hole, _GalleryLayout);
@@ -617,8 +623,10 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
           this.controlObject.translateY(this.ascensionVelocity);
         }
 
-        if (this.bigCubeStyle === "singleStack") {
-          this.topStackingBigCube.position.y = this.controlObject.position.y + this.bigCubeLength * this.bigCubeCount / 2;
+        if (!this.domMode) {
+          if (this.bigCubeStyle === "singleStack") {
+            this.topStackingBigCube.position.y = this.controlObject.position.y + this.bigCubeLength * this.bigCubeCount / 2;
+          }
         }
 
         while (this.controlObject.position.y < this.nextMediaToPassPosition && !this.hasReachedBottom) {
@@ -629,6 +637,15 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
     didPassMesh: {
       value: function didPassMesh() {
         var _this = this;
+
+        if (this.domMode) {
+          var media = this.media[this.nextMediaToPassIndex];
+          var imageURL = media.type === "image" ? media.media.url : media.thumbnail.url;
+          this.fullScreenImage.attr("src", imageURL);
+          this.nextMediaToPassIndex += 1;
+          this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaToPassIndex);
+          return;
+        }
 
         // mesh management
         if (this.nextMediaToPassIndex > this.halfActiveMeshCount) {
@@ -848,7 +865,7 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
   return Hole;
 })(GalleryLayout);
 
-},{"./gallery-layout.es6":3,"three":18}],5:[function(require,module,exports){
+},{"./gallery-layout.es6":3,"jquery":16,"three":18}],5:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -876,6 +893,7 @@ var Gallery = exports.Gallery = (function () {
     this.scene = scene;
     this.controlObject = options.controlObject;
     this.pitchObject = options.pitchObject;
+    this.domMode = options.domMode;
     this.yLevel = options.yLevel || 0;
     this.layoutCreator = function (options) {
       return new Hole(options);
@@ -899,6 +917,7 @@ var Gallery = exports.Gallery = (function () {
           //console.log(data);
 
           _this.layout = _this.layoutCreator({
+            domMode: _this.domMode,
             container: _this.meshContainer,
             controlObject: _this.controlObject,
             pitchObject: _this.pitchObject,
@@ -3096,6 +3115,8 @@ var Gallery = require("./gallery.es6").Gallery;
 var $splashStatus = $("#splash-status");
 var BaseLoadingText = "is loading";
 
+var ON_PHONE = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
 var MainScene = exports.MainScene = (function (_SheenScene) {
 
   /// Init
@@ -3132,6 +3153,7 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
 
         // make all the galleries here
         this.david = new Gallery(this.scene, {
+          domMode: ON_PHONE,
           controlObject: this.controlObject,
           pitchObject: this.pitchObject,
           yLevel: 0
@@ -3244,21 +3266,28 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
         $splashStatus.text("is ready");
         $splashStatus.css("font-style", "italic");
 
-        setTimeout(function () {
-          if (!_this.hasStarted) {
-            $("#splash-controls").fadeIn(1000);
-          }
-        }, 250);
-        setTimeout(function () {
-          if (!_this.hasStarted) {
-            $("#click-to-start").fadeIn(1000);
-          }
-        }, 1750);
+        if (ON_PHONE) {
+          $("#mobile-error-overlay").fadeIn(1000);
+        } else {
+          setTimeout(function () {
+            if (!_this.hasStarted) {
+              $("#splash-controls").fadeIn(1000);
+            }
+          }, 250);
+          setTimeout(function () {
+            if (!_this.hasStarted) {
+              $("#click-to-start").fadeIn(1000);
+            }
+          }, 1750);
+        }
       }
     },
     start: {
       value: function start() {
         $("#splash-overlay").fadeOut(1000);
+        if (ON_PHONE) {
+          $("#mobile-error-overlay").fadeOut(1000);
+        }
 
         this.sound.loop().play().fadeIn().fadeOut();
 
@@ -3266,21 +3295,23 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
 
         this.hasStarted = true;
 
-        // after 90 seconds show the first key hint
-        setTimeout(function () {
-          $("#key-hint-1").fadeIn(666);
+        if (!ON_PHONE) {
+          // after 90 seconds show the first key hint
           setTimeout(function () {
-            $("#key-hint-1").fadeOut(666);
-          }, 9666);
-        }, 90 * 1000);
+            $("#key-hint-1").fadeIn(666);
+            setTimeout(function () {
+              $("#key-hint-1").fadeOut(666);
+            }, 9666);
+          }, 90 * 1000);
 
-        // after 4 minutes show the second key hint
-        setTimeout(function () {
-          $("#key-hint-2").fadeIn(666);
+          // after 4 minutes show the second key hint
           setTimeout(function () {
-            $("#key-hint-2").fadeOut(666);
-          }, 9666);
-        }, 240 * 1000);
+            $("#key-hint-2").fadeIn(666);
+            setTimeout(function () {
+              $("#key-hint-2").fadeOut(666);
+            }, 9666);
+          }, 240 * 1000);
+        }
       }
     },
     makeLights: {
@@ -3360,10 +3391,6 @@ var Sheen = (function (_ThreeBoiler) {
       antialias: true,
       alpha: true
     });
-
-    if (/Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-      return;
-    }
 
     var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
     if (!isChrome) {

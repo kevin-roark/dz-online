@@ -113,7 +113,7 @@ a {
     display: none;
     font-size: 32px;
   }
-  #subsidiaries {
+  .subsidiaries {
     position: absolute; bottom: 20px; right: 20px;
     text-align: right;
   }

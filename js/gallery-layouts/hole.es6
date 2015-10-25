@@ -1,5 +1,6 @@
 
 let THREE = require('three');
+let $ = require('jquery');
 import {GalleryLayout} from './gallery-layout.es6';
 
 /// different hole styles
@@ -11,6 +12,7 @@ export class Hole extends GalleryLayout {
   constructor(options) {
     super(options);
 
+    this.domMode = options.domMode || false;
     this.xPosition = options.xPosition || 0;
     this.zPosition = options.zPosition || 0;
     this.imageWidth = options.imageWidth || 20;
@@ -42,18 +44,23 @@ export class Hole extends GalleryLayout {
     this.goCrazyRotate = false;
     this.ascending = false;
 
-    // big cube
-    // one fucked up way to get the stacked single-image cube is just to blast its length to length * count
-    this.handleBigCubeState();
+    if (!this.domMode) {
+      // one fucked up way to get the stacked single-image cube is just to blast its length to length * count
+      this.handleBigCubeState();
 
-    // perform initial layout
-    for (var i = 0; i < this.activeMeshCount; i++) {
-      var media = this.media[i];
-      this.layoutMedia(i, media);
+      // perform initial layout
+      for (var i = 0; i < this.activeMeshCount; i++) {
+        var media = this.media[i];
+        this.layoutMedia(i, media);
+      }
+
+      // face me down
+      this.pitchObject.rotation.x = -Math.PI / 2;
     }
-
-    // face me down
-    this.pitchObject.rotation.x = -Math.PI / 2;
+    else {
+      this.fullScreenImage = $('<img style="display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: red; z-index: 1000"></img>');
+      $('body').append(this.fullScreenImage);
+    }
   }
 
   start() {
@@ -88,8 +95,10 @@ export class Hole extends GalleryLayout {
       this.controlObject.translateY(this.ascensionVelocity);
     }
 
-    if (this.bigCubeStyle === 'singleStack') {
-      this.topStackingBigCube.position.y = this.controlObject.position.y + (this.bigCubeLength * this.bigCubeCount / 2);
+    if (!this.domMode) {
+      if (this.bigCubeStyle === 'singleStack') {
+        this.topStackingBigCube.position.y = this.controlObject.position.y + (this.bigCubeLength * this.bigCubeCount / 2);
+      }
     }
 
     while (this.controlObject.position.y < this.nextMediaToPassPosition && !this.hasReachedBottom) {
@@ -98,6 +107,15 @@ export class Hole extends GalleryLayout {
   }
 
   didPassMesh() {
+    if (this.domMode) {
+      var media = this.media[this.nextMediaToPassIndex];
+      var imageURL = media.type === 'image' ? media.media.url : media.thumbnail.url;
+      this.fullScreenImage.attr('src', imageURL);
+      this.nextMediaToPassIndex += 1;
+      this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaToPassIndex);
+      return;
+    }
+
     // mesh management
     if (this.nextMediaToPassIndex > this.halfActiveMeshCount) {
       // remove first item in array, the thing halfActiveMeshCount above me

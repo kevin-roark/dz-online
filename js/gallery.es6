@@ -15,6 +15,7 @@ export class Gallery {
     this.scene = scene;
     this.controlObject = options.controlObject;
     this.pitchObject = options.pitchObject;
+    this.domMode = options.domMode;
     this.yLevel = options.yLevel || 0;
     this.layoutCreator = (options) => { return new Hole(options); };
 
@@ -32,6 +33,7 @@ export class Gallery {
       //console.log(data);
 
       this.layout = this.layoutCreator({
+        domMode: this.domMode,
         container: this.meshContainer,
         controlObject: this.controlObject,
         pitchObject: this.pitchObject,
