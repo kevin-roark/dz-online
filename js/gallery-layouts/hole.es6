@@ -24,8 +24,7 @@ export class Hole extends GalleryLayout {
     this.fastAcceleration = options.fastAcceleration || -0.0005; // good fun value is -0.0005
     this.slowMotionVelocity = options.slowMotionVelocity || -0.01;
     this.ascensionVelocity = options.ascensionVelocity || 0.048;
-    this.layerBiggerVerticalCubes = options.layerBiggerVerticalCubes || false;
-    this.stackSingularBigCube = options.stackSingularBigCube || true;
+    this.bigCubeStyle = options.bigCubeStyle || 'none';
     this.bigCubeCount = options.bigCubeCount || 20;
     this.bigCubeLength = options.bigCubeLength || 500;
 
@@ -89,11 +88,8 @@ export class Hole extends GalleryLayout {
       this.controlObject.translateY(this.ascensionVelocity);
     }
 
-    if (this.stackSingularBigCube) {
+    if (this.bigCubeStyle === 'singleStack') {
       this.topStackingBigCube.position.y = this.controlObject.position.y + (this.bigCubeLength * this.bigCubeCount / 2);
-    }
-    if (this.layerBiggerVerticalCubes) {
-      this.topStackingLayerCube.position.y = this.controlObject.position.y + (this.bigCubeLength * this.bigCubeCount / 2);
     }
 
     while (this.controlObject.position.y < this.nextMediaToPassPosition && !this.hasReachedBottom) {
@@ -123,12 +119,25 @@ export class Hole extends GalleryLayout {
     this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaToPassIndex);
     //console.log('my pass index is ' + this.nextMediaToPassIndex);
 
-    if (this.stackSingularBigCube) {
+    if (this.bigCubeStyle === 'singleStack') {
       // update big cube with the current passing item
       this.updateStackingBigCubeTextures(this.media[this.nextMediaToPassIndex]);
     }
-    if (this.layerBiggerVerticalCubes) {
-      this.updateChildLayeringCubeTextures(this.nextMediaToPassIndex);
+    else if (this.bigCubeStyle === 'layer' && (this.nextMediaToPassIndex - 1) % 25 === 0) {
+      var bottomMeshIndex = (this.nextMediaToPassIndex - 1) + (this.bigCubeCount / 2) * 25;
+      if (bottomMeshIndex >= this.media.count) {
+        return;
+      }
+
+      var bigMesh = this.createBigCube(this.media[bottomMeshIndex]);
+      bigMesh.position.set(this.xPosition, this.controlObject.position.y + (this.bigCubeCount / 2) * -500, this.zPosition);
+      this.container.add(bigMesh);
+      this.bigLayeredCubes.push(bigMesh);
+
+      if (this.bigLayeredCubes.length > this.bigCubeCount) {
+        var bigCubeToRemove = this.bigLayeredCubes.unshift();
+        this.container.remove(bigCubeToRemove);
+      }
     }
 
     if (this.nextMediaToPassIndex >= this.media.length) {
@@ -187,30 +196,30 @@ export class Hole extends GalleryLayout {
   }
 
   toggleBigCube() {
-    if (this.stackSingularBigCube != this.layerBiggerVerticalCubes) {
-      this.stackSingularBigCube = !this.stackSingularBigCube;
-      this.layerBiggerVerticalCubes = !this.layerBiggerVerticalCubes;
+    if (this.bigCubeStyle === 'singleStack') {
+      this.bigCubeStyle = 'layer';
     }
-    else {
-      this.layerBiggerVerticalCubes = true;
+    else if (this.bigCubeStyle === 'layer') {
+      this.bigCubeStyle = 'none';
+    }
+    else if (this.bigCubeStyle === 'none') {
+      this.bigCubeStyle = 'singleStack';
     }
 
     this.handleBigCubeState();
   }
 
   handleBigCubeState() {
-    if (this.stackSingularBigCube) {
-      if (!this.topStackingBigCube) {
-        this.topStackingBigCube = this.createBigCube(this.media[this.nextMediaToPassIndex]);
-        this.container.add(this.topStackingBigCube);
+    if (this.bigCubeStyle === 'singleStack') {
+      this.topStackingBigCube = this.createBigCube(this.media[this.nextMediaToPassIndex]);
+      this.container.add(this.topStackingBigCube);
 
-        this.childStackingBigCubes = [];
-        for (var i = 1; i < this.bigCubeCount; i++) {
-          var cube = (i == 1) ? this.createBigCube(this.media[this.nextMediaToPassIndex]) : this.childStackingBigCubes[0].clone();
-          cube.position.y = - i * this.bigCubeLength;
-          this.topStackingBigCube.add(cube);
-          this.childStackingBigCubes.push(cube);
-        }
+      this.childStackingBigCubes = [];
+      for (var i = 1; i < this.bigCubeCount; i++) {
+        var cube = (i == 1) ? this.createBigCube(this.media[this.nextMediaToPassIndex]) : this.childStackingBigCubes[0].clone();
+        cube.position.y = - i * this.bigCubeLength;
+        this.topStackingBigCube.add(cube);
+        this.childStackingBigCubes.push(cube);
       }
     }
     else {
@@ -219,26 +228,37 @@ export class Hole extends GalleryLayout {
       this.childStackingBigCubes = null;
     }
 
-    if (this.layerBiggerVerticalCubes) {
-      if (!this.topStackingLayerCube) {
-        this.topStackingLayerCube = this.createBigCube();
-        this.container.add(this.topStackingLayerCube);
+    if (this.bigCubeStyle === 'layer') {
+      this.bigLayeredCubes = [];
 
-        this.childLayeringBigCubes = [];
-        for (var i = 1; i < this.bigCubeCount; i++) {
-          var cube = this.createBigCube();
-          cube.position.y = - i * this.bigCubeLength;
-          this.topStackingLayerCube.add(cube);
-          this.childLayeringBigCubes.push(cube);
+      for (var i = 0; i < this.bigCubeCount / 2; i++) {
+        var belowIndex = (i + this.nextMediaToPassIndex) * 25;
+        if (belowIndex < this.media.length) {
+          var bigMesh = this.createBigCube(this.media[belowIndex]);
+          bigMesh.position.set(this.xPosition, (this.controlObject.position.y || 0) + (i * -500), this.zPosition);
+          this.container.add(bigMesh);
+          this.bigLayeredCubes.push(bigMesh);
         }
 
-        this.updateChildLayeringCubeTextures(this.nextMediaToPassIndex);
+        if (i > 0) {
+          var aboveIndex = (this.nextMediaToPassIndex - i) * 25;
+          if (aboveIndex >= 0) {
+            var bigMesh = this.createBigCube(this.media[aboveIndex]);
+            bigMesh.position.set(this.xPosition, (this.controlObject.position.y || 0) + (i * 500), this.zPosition);
+            this.container.add(bigMesh);
+            this.bigLayeredCubes.push(bigMesh);
+          }
+        }
       }
     }
     else {
-      this.container.remove(this.topStackingLayerCube);
-      this.topStackingLayerCube = null;
-      this.childLayeringBigCubes = null;
+      if (this.bigLayeredCubes) {
+        for (var i = 0; i < this.bigLayeredCubes.length; i++) {
+          var bigLayerCube = this.bigLayeredCubes[i];
+          this.container.remove(bigLayerCube);
+        }
+      }
+      this.bigLayeredCubes = null;
     }
   }
 
@@ -261,21 +281,6 @@ export class Hole extends GalleryLayout {
     for (var i = 0; i < this.childStackingBigCubes.length; i++) {
       this.childStackingBigCubes[i].material = material;
       this.childStackingBigCubes[i].needsUpdate = true;
-    }
-  }
-
-  updateChildLayeringCubeTextures(passedMediaIndex) {
-    if (passedMediaIndex >= this.media.length) {
-      return;
-    }
-
-    var topMediaIndex = Math.max(0, passedMediaIndex - this.bigCubeCount / 2);
-    this.topStackingLayerCube.material = this.bigCubeMaterial(this.media[topMediaIndex]);
-    this.topStackingLayerCube.needsUpdate = true;
-
-    for (var i = 0; i < this.childLayeringBigCubes.length; i++) {
-      this.childLayeringBigCubes[i].material = this.bigCubeMaterial(this.media[topMediaIndex + i]);
-      this.childLayeringBigCubes[i].needsUpdate = true;
     }
   }
 
