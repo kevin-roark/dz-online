@@ -760,16 +760,18 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
     },
     toggleBigCube: {
       value: function toggleBigCube() {
-        if (this.bigCubeStyle === "singleStack") {
-          this.bigCubeStyle = "layer";
-          this.CubeToggleCount = this.CubeToggleCount + 1;
-        } else if (this.bigCubeStyle === "layer") {
-          this.bigCubeStyle = "none";
-        } else if (this.bigCubeStyle === "none") {
-          this.bigCubeStyle = "singleStack";
-        }
+        if (!this.hasReachedBottom) {
+          if (this.bigCubeStyle === "singleStack") {
+            this.bigCubeStyle = "layer";
+            this.CubeToggleCount = this.CubeToggleCount + 1;
+          } else if (this.bigCubeStyle === "layer") {
+            this.bigCubeStyle = "none";
+          } else if (this.bigCubeStyle === "none") {
+            this.bigCubeStyle = "singleStack";
+          }
 
-        this.handleBigCubeState();
+          this.handleBigCubeState();
+        }
       }
     },
     handleBigCubeState: {
