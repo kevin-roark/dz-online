@@ -99,6 +99,10 @@ class Sheen extends ThreeBoiler {
       case 114: /* r */
         this.mainScene.toggleSingleRotation();
         break;
+
+      case 112: /* p */
+        this.mainScene.toggleBigCube();
+        break;
     }
   }
 

@@ -95,6 +95,12 @@ export class MainScene extends SheenScene {
     }
   }
 
+  toggleBigCube() {
+    if (this.david.layout) {
+      this.david.layout.toggleBigCube();
+    }
+  }
+
   click() {
     if (this.loading || this.hasStarted) {
       return;
