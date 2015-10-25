@@ -584,7 +584,7 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
       // face me down
       this.pitchObject.rotation.x = -Math.PI / 2;
     } else {
-      this.fullScreenImage = $("<img style=\"display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: red; z-index: 1000\"></img>");
+      this.fullScreenImage = $("<img style=\"display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: white; z-index: 1000\"></img>");
       $("body").append(this.fullScreenImage);
     }
   }
@@ -594,7 +594,17 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
   _createClass(Hole, {
     start: {
       value: function start() {
+        var _this = this;
+
         this.hasStarted = true;
+
+        if (this.domMode) {
+          setTimeout(function () {
+            var media = _this.media[0];
+            var imageURL = media.type === "image" ? media.media.url : media.thumbnail.url;
+            _this.fullScreenImage.attr("src", imageURL);
+          }, 3000);
+        }
       }
     },
     update: {
@@ -639,9 +649,11 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
         var _this = this;
 
         if (this.domMode) {
-          var media = this.media[this.nextMediaToPassIndex];
-          var imageURL = media.type === "image" ? media.media.url : media.thumbnail.url;
-          this.fullScreenImage.attr("src", imageURL);
+          var media = this.media[this.nextMediaToPassIndex + 1];
+          if (media) {
+            var imageURL = media.type === "image" ? media.media.url : media.thumbnail.url;
+            this.fullScreenImage.attr("src", imageURL);
+          }
           this.nextMediaToPassIndex += 1;
           this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaToPassIndex);
           return;

@@ -58,13 +58,21 @@ export class Hole extends GalleryLayout {
       this.pitchObject.rotation.x = -Math.PI / 2;
     }
     else {
-      this.fullScreenImage = $('<img style="display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: red; z-index: 1000"></img>');
+      this.fullScreenImage = $('<img style="display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: white; z-index: 1000"></img>');
       $('body').append(this.fullScreenImage);
     }
   }
 
   start() {
     this.hasStarted = true;
+
+    if (this.domMode) {
+      setTimeout(() => {
+        var media = this.media[0];
+        var imageURL = media.type === 'image' ? media.media.url : media.thumbnail.url;
+        this.fullScreenImage.attr('src', imageURL);
+      }, 3000);
+    }
   }
 
   update() {
@@ -108,9 +116,11 @@ export class Hole extends GalleryLayout {
 
   didPassMesh() {
     if (this.domMode) {
-      var media = this.media[this.nextMediaToPassIndex];
-      var imageURL = media.type === 'image' ? media.media.url : media.thumbnail.url;
-      this.fullScreenImage.attr('src', imageURL);
+      var media = this.media[this.nextMediaToPassIndex + 1];
+      if (media) {
+        var imageURL = media.type === 'image' ? media.media.url : media.thumbnail.url;
+        this.fullScreenImage.attr('src', imageURL);
+      }
       this.nextMediaToPassIndex += 1;
       this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaToPassIndex);
       return;
