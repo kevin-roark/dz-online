@@ -3127,8 +3127,6 @@ var Gallery = require("./gallery.es6").Gallery;
 var $splashStatus = $("#splash-status");
 var BaseLoadingText = "is loading";
 
-var ON_PHONE = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
 var MainScene = exports.MainScene = (function (_SheenScene) {
 
   /// Init
@@ -3139,6 +3137,7 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
     _get(Object.getPrototypeOf(MainScene.prototype), "constructor", this).call(this, renderer, camera, scene, options);
 
     this.name = "Art Decade";
+    this.onPhone = options.onPhone || false;
   }
 
   _inherits(MainScene, _SheenScene);
@@ -3165,7 +3164,7 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
 
         // make all the galleries here
         this.david = new Gallery(this.scene, {
-          domMode: ON_PHONE,
+          domMode: this.onPhone,
           controlObject: this.controlObject,
           pitchObject: this.pitchObject,
           yLevel: 0
@@ -3278,7 +3277,7 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
         $splashStatus.text("is ready");
         $splashStatus.css("font-style", "italic");
 
-        if (ON_PHONE) {
+        if (this.onPhone) {
           $("#mobile-error-overlay").fadeIn(1000);
         } else {
           setTimeout(function () {
@@ -3297,7 +3296,7 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
     start: {
       value: function start() {
         $("#splash-overlay").fadeOut(1000);
-        if (ON_PHONE) {
+        if (this.onPhone) {
           $("#mobile-error-overlay").fadeOut(1000);
         }
 
@@ -3307,7 +3306,7 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
 
         this.hasStarted = true;
 
-        if (!ON_PHONE) {
+        if (!this.onPhone) {
           // after 90 seconds show the first key hint
           setTimeout(function () {
             $("#key-hint-1").fadeIn(666);
@@ -3393,6 +3392,8 @@ var MainScene = require("./main-scene.es6").MainScene;
 
 var FlyControls = require("./controls/fly-controls");
 
+var ON_PHONE = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
 var Sheen = (function (_ThreeBoiler) {
   function Sheen() {
     var _this = this;
@@ -3401,7 +3402,8 @@ var Sheen = (function (_ThreeBoiler) {
 
     _get(Object.getPrototypeOf(Sheen.prototype), "constructor", this).call(this, {
       antialias: true,
-      alpha: true
+      alpha: true,
+      onPhone: ON_PHONE
     });
 
     var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
@@ -3409,17 +3411,19 @@ var Sheen = (function (_ThreeBoiler) {
       $("#splash-please-use-chrome").show();
     }
 
-    this.renderer.shadowMapEnabled = true;
-    this.renderer.shadowMapCullFace = THREE.CullFaceBack;
-    this.renderer.shadowMapType = THREE.PCFSoftShadowMap;
+    if (this.renderer) {
+      this.renderer.shadowMapEnabled = true;
+      this.renderer.shadowMapCullFace = THREE.CullFaceBack;
+      this.renderer.shadowMapType = THREE.PCFSoftShadowMap;
 
-    this.renderer.gammaInput = true;
-    this.renderer.gammaOutput = true;
+      this.renderer.gammaInput = true;
+      this.renderer.gammaOutput = true;
+    }
 
     this.controls = new FlyControls(this.camera);
     this.scene.add(this.controls.getObject());
 
-    this.mainScene = new MainScene(this.renderer, this.camera, this.scene, {});
+    this.mainScene = new MainScene(this.renderer, this.camera, this.scene, { onPhone: ON_PHONE });
     this.mainScene.controlObject = this.controls.getObject();
     this.mainScene.pitchObject = this.controls.pitchObject();
 
@@ -3458,10 +3462,6 @@ var Sheen = (function (_ThreeBoiler) {
       value: function activate() {
         _get(Object.getPrototypeOf(Sheen.prototype), "activate", this).call(this);
 
-        if (!this.mainScene) {
-          return;
-        }
-
         this.scene.simulate();
 
         this.mainScene.startScene();
@@ -3470,10 +3470,6 @@ var Sheen = (function (_ThreeBoiler) {
     render: {
       value: function render() {
         _get(Object.getPrototypeOf(Sheen.prototype), "render", this).call(this);
-
-        if (!this.mainScene) {
-          return;
-        }
 
         this.controls.update();
         this.mainScene.update();
@@ -3933,20 +3929,23 @@ var ThreeBoiler = exports.ThreeBoiler = (function () {
 
     _classCallCheck(this, ThreeBoiler);
 
-    try {
-      this.renderer = new THREE.WebGLRenderer(rendererOptions);
-      this.renderMode = "webgl";
-    } catch (e) {
-      $(".webgl-error").show();
-      setTimeout(function () {
-        $(".webgl-error").fadeOut();
-      }, 6666);
-      this.renderer = new THREE.CanvasRenderer();
-      this.renderMode = "canvas";
-    }
+    this.onPhone = rendererOptions.onPhone || false;
+    if (!this.onPhone) {
+      try {
+        this.renderer = new THREE.WebGLRenderer(rendererOptions);
+        this.renderMode = "webgl";
+      } catch (e) {
+        $(".webgl-error").show();
+        setTimeout(function () {
+          $(".webgl-error").fadeOut();
+        }, 6666);
+        this.renderer = new THREE.CanvasRenderer();
+        this.renderMode = "canvas";
+      }
 
-    this.renderer.setClearColor(16777215, 1);
-    document.body.appendChild(this.renderer.domElement);
+      this.renderer.setClearColor(16777215, 1);
+      document.body.appendChild(this.renderer.domElement);
+    }
 
     this.scene = this.createScene();
 
@@ -3998,12 +3997,16 @@ var ThreeBoiler = exports.ThreeBoiler = (function () {
 
         this.frame += 1;
 
-        this.renderer.render(this.scene, this.camera);
+        if (this.renderer) {
+          this.renderer.render(this.scene, this.camera);
+        }
       }
     },
     resize: {
       value: function resize() {
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        if (this.renderer) {
+          this.renderer.setSize(window.innerWidth, window.innerHeight);
+        }
 
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();

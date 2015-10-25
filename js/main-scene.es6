@@ -10,8 +10,6 @@ import {Gallery} from './gallery.es6';
 var $splashStatus = $('#splash-status');
 var BaseLoadingText = 'is loading';
 
-var ON_PHONE = (/Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
-
 export class MainScene extends SheenScene {
 
   /// Init
@@ -20,6 +18,7 @@ export class MainScene extends SheenScene {
     super(renderer, camera, scene, options);
 
     this.name = "Art Decade";
+    this.onPhone = options.onPhone || false;
   }
 
   /// Overrides
@@ -41,7 +40,7 @@ export class MainScene extends SheenScene {
 
     // make all the galleries here
     this.david = new Gallery(this.scene, {
-      domMode: ON_PHONE,
+      domMode: this.onPhone,
       controlObject: this.controlObject,
       pitchObject: this.pitchObject,
       yLevel: 0
@@ -137,7 +136,7 @@ export class MainScene extends SheenScene {
     $splashStatus.text('is ready');
     $splashStatus.css('font-style', 'italic');
 
-    if (ON_PHONE) {
+    if (this.onPhone) {
       $('#mobile-error-overlay').fadeIn(1000);
     }
     else {
@@ -156,7 +155,7 @@ export class MainScene extends SheenScene {
 
   start() {
     $('#splash-overlay').fadeOut(1000);
-    if (ON_PHONE) {
+    if (this.onPhone) {
       $('#mobile-error-overlay').fadeOut(1000);
     }
 
@@ -166,7 +165,7 @@ export class MainScene extends SheenScene {
 
     this.hasStarted = true;
 
-    if (!ON_PHONE) {
+    if (!this.onPhone) {
       // after 90 seconds show the first key hint
       setTimeout(function() {
         $('#key-hint-1').fadeIn(666);

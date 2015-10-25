@@ -4,20 +4,23 @@ let THREE = require('three');
 
 export class ThreeBoiler {
   constructor(rendererOptions) {
-    try {
-      this.renderer = new THREE.WebGLRenderer(rendererOptions);
-      this.renderMode = 'webgl';
-    } catch(e) {
-      $('.webgl-error').show();
-      setTimeout(function() {
-        $('.webgl-error').fadeOut();
-      }, 6666);
-      this.renderer = new THREE.CanvasRenderer();
-      this.renderMode = 'canvas';
-    }
+    this.onPhone = rendererOptions.onPhone || false;
+    if (!this.onPhone) {
+      try {
+        this.renderer = new THREE.WebGLRenderer(rendererOptions);
+        this.renderMode = 'webgl';
+      } catch(e) {
+        $('.webgl-error').show();
+        setTimeout(function() {
+          $('.webgl-error').fadeOut();
+        }, 6666);
+        this.renderer = new THREE.CanvasRenderer();
+        this.renderMode = 'canvas';
+      }
 
-    this.renderer.setClearColor(0xffffff, 1);
-    document.body.appendChild(this.renderer.domElement);
+      this.renderer.setClearColor(0xffffff, 1);
+      document.body.appendChild(this.renderer.domElement);
+    }
 
     this.scene = this.createScene();
 
@@ -55,11 +58,15 @@ export class ThreeBoiler {
 
     this.frame += 1;
 
-    this.renderer.render(this.scene, this.camera);
+    if (this.renderer) {
+      this.renderer.render(this.scene, this.camera);
+    }
   }
 
   resize() {
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    if (this.renderer) {
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
 
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
