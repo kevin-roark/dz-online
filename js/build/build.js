@@ -551,7 +551,7 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
     this.fastAcceleration = options.fastAcceleration || -0.0005; // good fun value is -0.0005
     this.slowMotionVelocity = options.slowMotionVelocity || -0.01;
     this.ascensionVelocity = options.ascensionVelocity || 0.048;
-    this.useBigCube = options.useBigCube || false;
+    this.useBigCube = options.useBigCube || true;
 
     this.activeMeshCount = options.activeMeshCount || 400;
     this.halfActiveMeshCount = this.activeMeshCount / 2;
