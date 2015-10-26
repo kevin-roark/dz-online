@@ -552,6 +552,8 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
     this.fastAcceleration = options.fastAcceleration || -0.0005; // good fun value is -0.0005
     this.slowMotionVelocity = options.slowMotionVelocity || -0.01;
     this.ascensionVelocity = options.ascensionVelocity || 0.048;
+    this.crazyRotationVelocity = options.crazyRotationVelocity || 0.0005;
+    this.crazyRotationAcceleration = options.crazyRotationAcceleration || 0.000008;
     this.bigCubeStyle = options.bigCubeStyle || "none";
     this.bigCubeCount = options.bigCubeCount || 26;
     this.bigCubeLength = options.bigCubeLength || 500;
@@ -626,6 +628,8 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
             }
 
             this.controlObject.translateY(this.downwardVelocity);
+
+            this.crazyRotationVelocity += this.crazyRotationAcceleration;
           } else {
             this.controlObject.translateY(Math.max(this.slowMotionVelocity, this.downwardVelocity));
           }
@@ -637,6 +641,11 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
         if (!this.domMode) {
           if (this.bigCubeStyle === "singleStack") {
             this.topStackingBigCube.position.y = this.controlObject.position.y + this.bigCubeLength * this.bigCubeCount / 2;
+          }
+
+          if (this.goCrazyRotate) {
+            this.controlObject.rotation.y += this.crazyRotationVelocity;
+            this.pitchObject.rotation.x += this.crazyRotationVelocity;
           }
         }
 
@@ -669,12 +678,6 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
           // add the next media to the barrel
           this.layoutMedia(this.nextMediaToAddIndex, this.media[this.nextMediaToAddIndex]);
           this.nextMediaToAddIndex += 1;
-        }
-
-        // turn the camera wildly
-        if (this.goCrazyRotate) {
-          this.turnControlObject(this.nextMediaToPassIndex);
-          this.turnPitchObject(this.nextMediaToPassIndex);
         }
 
         this.nextMediaToPassIndex += 1;
@@ -739,18 +742,6 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
       value: function yForMediaWithIndex(index) {
         var y = this.yLevel - index * this.distanceBetweenPhotos;
         return y;
-      }
-    },
-    turnControlObject: {
-      value: function turnControlObject(index) {
-        var yrotation = Math.PI * (index / 50);
-        this.controlObject.rotation.y = yrotation;
-      }
-    },
-    turnPitchObject: {
-      value: function turnPitchObject(index) {
-        var xrotation = Math.PI * (index / 50);
-        this.pitchObject.rotation.x = xrotation;
       }
     },
     toggleSlowMotion: {
