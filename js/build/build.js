@@ -68,7 +68,7 @@ module.exports = function (camera, options) {
 
 	// internals
 
-	this.prevTime = performance.now();
+	this.prevTime = window.performance ? window.performance.now() : new Date();
 
 	this.mouseStatus = 0;
 
@@ -279,7 +279,7 @@ module.exports = function (camera, options) {
 	};
 
 	this.update = function () {
-		var time = performance.now();
+		var time = window.performance ? window.performance.now() : new Date();
 		var delta = (time - this.prevTime) / 1000;
 
 		if (this.enabled) {
