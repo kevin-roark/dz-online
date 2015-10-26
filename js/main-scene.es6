@@ -18,6 +18,7 @@ export class MainScene extends SheenScene {
     super(renderer, camera, scene, options);
 
     this.name = "Art Decade";
+    this.onPhone = options.onPhone || false;
   }
 
   /// Overrides
@@ -28,17 +29,18 @@ export class MainScene extends SheenScene {
     this.loading = true;
     this.updateLoadingView();
 
-    this.sound = new buzz.sound('/media/falling2', {
+    this.sound = new buzz.sound('/media/falling3', {
       formats: ["mp3"],
       webAudioApi: true,
       volume: 100
     });
-    buzz.defaults.duration = 50;
+    buzz.defaults.duration = 2000;
 
     this.makeLights();
 
     // make all the galleries here
     this.david = new Gallery(this.scene, {
+      domMode: this.onPhone,
       controlObject: this.controlObject,
       pitchObject: this.pitchObject,
       yLevel: 0
@@ -83,18 +85,23 @@ export class MainScene extends SheenScene {
     }
   }
 
-/*  keypress(82) {
+  toggleSingleRotation() {
     if (this.david.layout) {
       this.david.layout.toggleRotateOnce();
     }
   }
 
-  keypress(81) {
+  toggleCrazyRotation() {
     if (this.david.layout) {
       this.david.layout.toggleCrazyRotate();
     }
   }
-*/
+
+  toggleBigCube() {
+    if (this.david.layout) {
+      this.david.layout.toggleBigCube();
+    }
+  }
 
   click() {
     if (this.loading || this.hasStarted) {
@@ -129,26 +136,52 @@ export class MainScene extends SheenScene {
     $splashStatus.text('is ready');
     $splashStatus.css('font-style', 'italic');
 
-    setTimeout(() => {
-      if (!this.hasStarted) {
-        $('#splash-controls').fadeIn(1000);
-      }
-    }, 250);
-    setTimeout(() => {
-      if (!this.hasStarted) {
-        $('#click-to-start').fadeIn(1000);
-      }
-    }, 1750);
+    if (this.onPhone) {
+      $('#mobile-error-overlay').fadeIn(1000);
+    }
+    else {
+      setTimeout(() => {
+        if (!this.hasStarted) {
+          $('#splash-controls').fadeIn(1000);
+        }
+      }, 250);
+      setTimeout(() => {
+        if (!this.hasStarted) {
+          $('#click-to-start').fadeIn(1000);
+        }
+      }, 1750);
+    }
   }
 
   start() {
     $('#splash-overlay').fadeOut(1000);
+    if (this.onPhone) {
+      $('#mobile-error-overlay').fadeOut(1000);
+    }
 
-    this.sound.loop().play().fadeIn();
+    this.sound.loop().play().fadeIn().fadeOut();
 
     this.david.layout.start();
 
     this.hasStarted = true;
+
+    if (!this.onPhone) {
+      // after 90 seconds show the first key hint
+      setTimeout(function() {
+        $('#key-hint-1').fadeIn(666);
+        setTimeout(function() {
+          $('#key-hint-1').fadeOut(666);
+        }, 9666);
+      }, 90 * 1000);
+
+      // after 4 minutes show the second key hint
+      setTimeout(() => {
+        $('#key-hint-2').fadeIn(666);
+        setTimeout(function() {
+          $('#key-hint-2').fadeOut(666);
+        }, 9666);
+      }, 240 * 1000);
+    }
   }
 
   // Creation

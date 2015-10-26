@@ -45,15 +45,16 @@ module.exports.randomGalleryMedia = function(callback) {
   module.exports.locationMedia(kt.choice(galleryIDs), callback);
 };
 
-module.exports.compress = function(responseData) {
+module.exports.compress = function(responseData, addCaption) {
   function minData(data) {
     var min = {
+      id: data.id,
       type: data.type,
       likes: data.likes.count,
       thumbnail: data.images.thumbnail
     };
 
-    if (data.caption) {
+    if (addCaption && data.caption) {
       min.caption = data.caption.text;
     }
 

@@ -9,9 +9,14 @@
 
     <title>David Zwirnher Online</title>
 
+    <meta name="google-site-verification" content="e3hfzmk_K1V_tIWlgciwbDLY10ttFDiplknD05z7BLc" />
+    <meta name="description" content="David Zwirnher Online, Fall Into The Hole" />
+    <meta name="author" content="gallery@home">
+    <meta name="keywords" content="David Zwirnher Online, online gallery, the gallery online, please help me look at art online">
+
     <meta property="og:title" content="David Zwirnher Online"/>
     <meta property="og:type" content="website"/>
-    <meta property="og:image" content=""/>
+    <meta property="og:image" content="http://www.davidzwirnher.com/media/mobile_error.jpg"/>
     <meta property="og:description" content="David Zwirnher Online, Fall Into The Hole"/>
     <meta property="og:url" content="http://www.davidzwirnher.com/"/>
 
@@ -25,20 +30,49 @@
     <!-- content -->
 
     <div class="webgl-error">Please Upgrade Browser To See Art</div>
+    <div id="mobile-error-overlay">
+      <p>
+        Unfortunately, contemporary technology makes it near-impossible to optimally serve art
+        to your cellular device. You Are Receiving Subpar Art, but Tap anywhere to continue.
+        Please visit David Zwirnher Online soon on a Big Browser.
+        Also, please accept this picture an apology:
+        <img id="mobile-error-image" src="media/mobile_error.jpg" alt="Mobile Error"></img>
+        Thanks,<br>
+        David Zwirnher Online Team<br>
+      </p>
+      <div class="subsidiaries">
+        <div >subsidiary of <a target="_blank" href="http://www.thegallery.online">gallery@home</a></div>
+        <div >coming soon - <a target="_blank" href="http://www.momah.xyz">Momah</a></div>
+      </div>
+    </div>
 
     <div id="scene-overlay"></div>
 
     <div id="splash-overlay">
       <div class="title">David Zwirnher Online</div>
       <div id="splash-status">is loading</div>
-      <div id="splash-controls">use the W,A,S,D keys to walk, move the mouse to look
-<!-- spacebar to slow, R to rotate, Q to ROTATE -->
-epilepsy warning: seizure, art
+      <div id="splash-please-use-chrome">
+        This is not Google Chrome. Please note that David Zwirnher Online is
+        optimized for Chrome. You may proceed.
+      </div>
+      <div id="splash-controls">
+        <div id="splash-disclaimer">
+          epilepsy warning: flashing images, art<br><br>
+          all galleries appearing in this work are fictitious<br>
+          any resemblance to real galleries, living or dead, is purely coincidental
+        </div>
 
-all galleries appearing in this work are fictitious
-any resemblance to real galleries, living or dead, is purely coincidental</div>
+        move the mouse to look
+      </div>
       <div id="click-to-start">click to start</div>
+      <div class="subsidiaries">
+        <div >subsidiary of <a target="_blank" href="http://www.thegallery.online">gallery@home</a></div>
+        <div >coming soon - <a target="_blank" href="http://www.momah.xyz">Momah</a></div>
+      </div>
     </div>
+
+    <div id="key-hint-1" class="key-hint">use the W, A, S, &amp; D keys to walk, r to rotate</div>
+    <div id="key-hint-2" class="key-hint">use spacebar, P, and Q for special effects</div>
 
     <!-- shaders -->
 
@@ -69,5 +103,14 @@ any resemblance to real galleries, living or dead, is purely coincidental</div>
 
     <!-- scripts -->
     <script src="js/build/build.js"></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-50868415-5', 'auto');
+      ga('send', 'pageview');
+    </script>
 </body>
 </html>

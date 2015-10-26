@@ -68,7 +68,7 @@ module.exports = function (camera, options) {
 
 	// internals
 
-	this.prevTime = performance.now();
+	this.prevTime = window.performance ? window.performance.now() : new Date();
 
 	this.mouseStatus = 0;
 
@@ -279,7 +279,7 @@ module.exports = function (camera, options) {
 	};
 
 	this.update = function () {
-		var time = performance.now();
+		var time = window.performance ? window.performance.now() : new Date();
 		var delta = (time - this.prevTime) / 1000;
 
 		if (this.enabled) {
@@ -523,8 +523,8 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
 var THREE = require("three");
+var $ = require("jquery");
 
 var GalleryLayout = require("./gallery-layout.es6").GalleryLayout;
 
@@ -538,6 +538,7 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
 
     _get(Object.getPrototypeOf(Hole.prototype), "constructor", this).call(this, options);
 
+    this.domMode = options.domMode || false;
     this.xPosition = options.xPosition || 0;
     this.zPosition = options.zPosition || 0;
     this.imageWidth = options.imageWidth || 20;
@@ -551,12 +552,19 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
     this.fastAcceleration = options.fastAcceleration || -0.0005; // good fun value is -0.0005
     this.slowMotionVelocity = options.slowMotionVelocity || -0.01;
     this.ascensionVelocity = options.ascensionVelocity || 0.048;
+    this.crazyRotationVelocity = options.crazyRotationVelocity || 0.0005;
+    this.crazyRotationAcceleration = options.crazyRotationAcceleration || 0.000008;
+    this.bigCubeStyle = options.bigCubeStyle || "none";
+    this.bigCubeCount = options.bigCubeCount || 26;
+    this.bigCubeLength = options.bigCubeLength || 500;
+    this.cycleMultiplier = options.cycleMultiplier || 25; // 20-25 keeps up with images, 1 starts from beginning like old v1; if value is too high you can run out of images after many toggles.
+    this.CubeToggleCount = options.CubeToggleCount || 0; // Used this for some testing -- might be helpful in the future
 
-    this.activeMeshCount = options.activeMeshCount || 666;
+    this.activeMeshCount = options.activeMeshCount || 400;
     this.halfActiveMeshCount = this.activeMeshCount / 2;
-    this.nextMediaMeshToPassIndex = 0;
+    this.nextMediaToPassIndex = 0;
     this.hasReachedBottom = false;
-    this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaMeshToPassIndex);
+    this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaToPassIndex);
     this.nextMediaToAddIndex = this.activeMeshCount; // we will layout 0 -> 665 in the constructor
     this.activeMeshes = [];
 
@@ -566,14 +574,22 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
     this.goCrazyRotate = false;
     this.ascending = false;
 
-    // perform initial layout
-    for (var i = 0; i < this.activeMeshCount; i++) {
-      var media = this.media[i];
-      this.layoutMedia(i, media);
-    }
+    if (!this.domMode) {
+      // one fucked up way to get the stacked single-image cube is just to blast its length to length * count
+      this.handleBigCubeState();
 
-    // face me down
-    this.pitchObject.rotation.x = -Math.PI / 2;
+      // perform initial layout
+      for (var i = 0; i < this.activeMeshCount; i++) {
+        var media = this.media[i];
+        this.layoutMedia(i, media);
+      }
+
+      // face me down
+      this.pitchObject.rotation.x = -Math.PI / 2;
+    } else {
+      this.fullScreenImage = $("<img style=\"display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: white; z-index: 1000\"></img>");
+      $("body").append(this.fullScreenImage);
+    }
   }
 
   _inherits(Hole, _GalleryLayout);
@@ -581,13 +597,21 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
   _createClass(Hole, {
     start: {
       value: function start() {
+        var _this = this;
+
         this.hasStarted = true;
+
+        if (this.domMode) {
+          setTimeout(function () {
+            var media = _this.media[0];
+            var imageURL = media.type === "image" ? media.media.url : media.thumbnail.url;
+            _this.fullScreenImage.attr("src", imageURL);
+          }, 3000);
+        }
       }
     },
     update: {
       value: function update() {
-        var _this = this;
-
         _get(Object.getPrototypeOf(Hole.prototype), "update", this).call(this);
 
         if (!this.hasStarted) {
@@ -604,6 +628,8 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
             }
 
             this.controlObject.translateY(this.downwardVelocity);
+
+            this.crazyRotationVelocity += this.crazyRotationAcceleration;
           } else {
             this.controlObject.translateY(Math.max(this.slowMotionVelocity, this.downwardVelocity));
           }
@@ -612,27 +638,77 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
           this.controlObject.translateY(this.ascensionVelocity);
         }
 
+        if (!this.domMode) {
+          if (this.bigCubeStyle === "singleStack") {
+            this.topStackingBigCube.position.y = this.controlObject.position.y + this.bigCubeLength * this.bigCubeCount / 2;
+          }
+
+          if (this.goCrazyRotate) {
+            this.controlObject.rotation.y += this.crazyRotationVelocity;
+            this.pitchObject.rotation.x += this.crazyRotationVelocity;
+          }
+        }
+
         while (this.controlObject.position.y < this.nextMediaToPassPosition && !this.hasReachedBottom) {
-          if (this.nextMediaMeshToPassIndex > this.halfActiveMeshCount) {
-            // remove first item in array, the thing halfActiveMeshCount above me
-            var meshToRemove = this.activeMeshes.shift();
-            this.container.remove(meshToRemove);
+          this.didPassMesh();
+        }
+      }
+    },
+    didPassMesh: {
+      value: function didPassMesh() {
+        var _this = this;
 
-            // add the next media to the barrel
-            this.layoutMedia(this.nextMediaToAddIndex, this.media[this.nextMediaToAddIndex]);
-            this.nextMediaToAddIndex += 1;
+        if (this.domMode) {
+          var media = this.media[this.nextMediaToPassIndex + 1];
+          if (media) {
+            var imageURL = media.type === "image" ? media.media.url : media.thumbnail.url;
+            this.fullScreenImage.attr("src", imageURL);
+          }
+          this.nextMediaToPassIndex += 1;
+          this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaToPassIndex);
+          return;
+        }
+
+        // mesh management
+        if (this.nextMediaToPassIndex > this.halfActiveMeshCount) {
+          // remove first item in array, the thing halfActiveMeshCount above me
+          var meshToRemove = this.activeMeshes.shift();
+          this.container.remove(meshToRemove);
+
+          // add the next media to the barrel
+          this.layoutMedia(this.nextMediaToAddIndex, this.media[this.nextMediaToAddIndex]);
+          this.nextMediaToAddIndex += 1;
+        }
+
+        this.nextMediaToPassIndex += 1;
+        this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaToPassIndex);
+        //console.log('my pass index is ' + this.nextMediaToPassIndex);
+
+        if (this.bigCubeStyle === "singleStack") {
+          // update big cube with the current passing item
+          this.updateStackingBigCubeTextures(this.media[this.nextMediaToPassIndex]);
+        } else if (this.bigCubeStyle === "layer" && (this.nextMediaToPassIndex - 1) % 25 === 0) {
+          var bottomMeshIndex = this.nextMediaToPassIndex - 1 + this.bigCubeCount / 2 * 25;
+          if (bottomMeshIndex >= this.media.count) {
+            return;
           }
 
-          this.nextMediaMeshToPassIndex += 1;
-          this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaMeshToPassIndex);
-          //console.log('my pass index is ' + this.nextMediaMeshToPassIndex);
+          var bigMesh = this.createBigCube(this.media[bottomMeshIndex]);
+          bigMesh.position.set(this.xPosition, this.controlObject.position.y + this.bigCubeCount / 2 * -500, this.zPosition);
+          this.container.add(bigMesh);
+          this.bigLayeredCubes.push(bigMesh);
 
-          if (this.nextMediaMeshToPassIndex >= this.media.length) {
-            this.hasReachedBottom = true;
-            setTimeout(function () {
-              _this.ascending = true;
-            }, 3000); // wait 3 seconds at the bottom
+          if (this.bigLayeredCubes.length > this.bigCubeCount) {
+            var bigCubeToRemove = this.bigLayeredCubes.unshift();
+            this.container.remove(bigCubeToRemove);
           }
+        }
+
+        if (this.nextMediaToPassIndex >= this.media.length) {
+          this.hasReachedBottom = true;
+          setTimeout(function () {
+            _this.ascending = true;
+          }, 3000); // wait 3 seconds at the bottom
         }
       }
     },
@@ -655,13 +731,6 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
           mesh.rotation.y = Math.PI; // rightside up images
         }
 
-        ///these turn the camera wildly after it his 666 index.
-        /* if( this.goRotateOnce) {
-        this.controlObject.rotation.y = this.turnControlObject(index);
-        this.pitchObject.rotation.x = this.turnPitchObject(index);
-        }
-        */
-
         // cool stacky intersection way: this.yLevel - (index * repeatIndex * this.distanceBetweenPhotos)
         mesh.position.set(this.xPosition, this.yForMediaWithIndex(index), this.zPosition);
 
@@ -675,33 +744,127 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
         return y;
       }
     },
-    turnControlObject: {
-      value: function turnControlObject(index) {
-        var yrotation = Math.PI * ((index - 665) / 50);
-        return yrotation;
-      }
-    },
-    turnPitchObject: {
-      value: function turnPitchObject(index) {
-        var xrotation = Math.PI * ((index - 665) / 50);
-        return xrotation;
-      }
-    },
     toggleSlowMotion: {
       value: function toggleSlowMotion() {
         this.inSlowMotion = !this.inSlowMotion;
       }
     },
-    toggleCrazyRotate: {
+    toggleBigCube: {
+      value: function toggleBigCube() {
+        if (!this.hasReachedBottom) {
+          if (this.bigCubeStyle === "singleStack") {
+            this.bigCubeStyle = "layer";
+            this.CubeToggleCount = this.CubeToggleCount + 1;
+          } else if (this.bigCubeStyle === "layer") {
+            this.bigCubeStyle = "none";
+          } else if (this.bigCubeStyle === "none") {
+            this.bigCubeStyle = "singleStack";
+          }
 
-      /*  toggleRotateOnce() {
-          this.pitchObject.rotation.x = this.pitchObject.rotation.x - Math.PI / 2;
+          this.handleBigCubeState();
         }
-      
-      */
+      }
+    },
+    handleBigCubeState: {
+      value: function handleBigCubeState() {
+        if (this.bigCubeStyle === "singleStack") {
+          this.topStackingBigCube = this.createBigCube(this.media[this.nextMediaToPassIndex]);
+          this.container.add(this.topStackingBigCube);
 
+          this.childStackingBigCubes = [];
+          for (var i = 1; i < this.bigCubeCount; i++) {
+            var cube = i == 1 ? this.createBigCube(this.media[this.nextMediaToPassIndex]) : this.childStackingBigCubes[0].clone();
+            cube.position.y = -i * this.bigCubeLength;
+            this.topStackingBigCube.add(cube);
+            this.childStackingBigCubes.push(cube);
+          }
+        } else {
+          this.container.remove(this.topStackingBigCube);
+          this.topStackingBigCube = null;
+          this.childStackingBigCubes = null;
+        }
+
+        if (this.bigCubeStyle === "layer") {
+          this.bigLayeredCubes = [];
+
+          for (var i = 0; i < this.bigCubeCount / 2; i++) {
+            var belowIndex = i + this.nextMediaToPassIndex + i * this.cycleMultiplier;
+            if (belowIndex < this.media.length) {
+              var bigMesh = this.createBigCube(this.media[belowIndex]);
+              bigMesh.position.set(this.xPosition, (this.controlObject.position.y || 0) + i * -500, this.zPosition);
+              this.container.add(bigMesh);
+              this.bigLayeredCubes.push(bigMesh);
+            }
+
+            if (i > 0) {
+              var aboveIndex = this.nextMediaToPassIndex - i + i * this.cycleMultiplier;
+              if (aboveIndex >= 0) {
+                var bigMesh = this.createBigCube(this.media[aboveIndex]);
+                bigMesh.position.set(this.xPosition, (this.controlObject.position.y || 0) + i * 500, this.zPosition);
+                this.container.add(bigMesh);
+                this.bigLayeredCubes.push(bigMesh);
+              }
+            }
+          }
+        } else {
+          if (this.bigLayeredCubes) {
+            for (var i = 0; i < this.bigLayeredCubes.length; i++) {
+              var bigLayerCube = this.bigLayeredCubes[i];
+              this.container.remove(bigLayerCube);
+            }
+          }
+          this.bigLayeredCubes = null;
+        }
+      }
+    },
+    toggleRotateOnce: {
+      value: function toggleRotateOnce() {
+        var oldval = this.pitchObject.rotation.x;
+        this.pitchObject.rotation.x = oldval - Math.PI / 2;
+      }
+    },
+    toggleCrazyRotate: {
       value: function toggleCrazyRotate() {
         this.goCrazyRotate = !this.goCrazyRotate;
+      }
+    },
+    updateStackingBigCubeTextures: {
+      value: function updateStackingBigCubeTextures(media) {
+        var material = this.bigCubeMaterial(media);
+        if (!material) {
+          return;
+        }this.topStackingBigCube.material = material;
+        this.topStackingBigCube.needsUpdate = true;
+
+        for (var i = 0; i < this.childStackingBigCubes.length; i++) {
+          this.childStackingBigCubes[i].material = material;
+          this.childStackingBigCubes[i].needsUpdate = true;
+        }
+      }
+    },
+    createBigCube: {
+      value: function createBigCube(media) {
+        var material = media ? this.bigCubeMaterial(media) : new THREE.MeshFaceMaterial();
+        return new THREE.Mesh(new THREE.BoxGeometry(this.bigCubeLength, this.bigCubeLength, this.bigCubeLength), material);
+      }
+    },
+    bigCubeMaterial: {
+      value: function bigCubeMaterial(media) {
+        if (!media) {
+          return null;
+        }var texture = this.createTexture(media);
+
+        var material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide }); // want shiny? maybe l8r
+
+        var materials = [material, // Left side
+        material.clone(), // Right side
+        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 }), // Top side
+        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 }), // Bottom side
+        material.clone(), // Front side
+        material.clone() // Back side
+        ];
+
+        return new THREE.MeshFaceMaterial(materials);
       }
     }
   });
@@ -709,7 +872,7 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
   return Hole;
 })(GalleryLayout);
 
-},{"./gallery-layout.es6":3,"three":18}],5:[function(require,module,exports){
+},{"./gallery-layout.es6":3,"jquery":16,"three":18}],5:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -737,6 +900,7 @@ var Gallery = exports.Gallery = (function () {
     this.scene = scene;
     this.controlObject = options.controlObject;
     this.pitchObject = options.pitchObject;
+    this.domMode = options.domMode;
     this.yLevel = options.yLevel || 0;
     this.layoutCreator = function (options) {
       return new Hole(options);
@@ -760,6 +924,7 @@ var Gallery = exports.Gallery = (function () {
           //console.log(data);
 
           _this.layout = _this.layoutCreator({
+            domMode: _this.domMode,
             container: _this.meshContainer,
             controlObject: _this.controlObject,
             pitchObject: _this.pitchObject,
@@ -2967,6 +3132,7 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
     _get(Object.getPrototypeOf(MainScene.prototype), "constructor", this).call(this, renderer, camera, scene, options);
 
     this.name = "Art Decade";
+    this.onPhone = options.onPhone || false;
   }
 
   _inherits(MainScene, _SheenScene);
@@ -2982,17 +3148,18 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
         this.loading = true;
         this.updateLoadingView();
 
-        this.sound = new buzz.sound("/media/falling2", {
+        this.sound = new buzz.sound("/media/falling3", {
           formats: ["mp3"],
           webAudioApi: true,
           volume: 100
         });
-        buzz.defaults.duration = 50;
+        buzz.defaults.duration = 2000;
 
         this.makeLights();
 
         // make all the galleries here
         this.david = new Gallery(this.scene, {
+          domMode: this.onPhone,
           controlObject: this.controlObject,
           pitchObject: this.pitchObject,
           yLevel: 0
@@ -3045,21 +3212,28 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
         }
       }
     },
+    toggleSingleRotation: {
+      value: function toggleSingleRotation() {
+        if (this.david.layout) {
+          this.david.layout.toggleRotateOnce();
+        }
+      }
+    },
+    toggleCrazyRotation: {
+      value: function toggleCrazyRotation() {
+        if (this.david.layout) {
+          this.david.layout.toggleCrazyRotate();
+        }
+      }
+    },
+    toggleBigCube: {
+      value: function toggleBigCube() {
+        if (this.david.layout) {
+          this.david.layout.toggleBigCube();
+        }
+      }
+    },
     click: {
-
-      /*  keypress(82) {
-          if (this.david.layout) {
-            this.david.layout.toggleRotateOnce();
-          }
-        }
-      
-        keypress(81) {
-          if (this.david.layout) {
-            this.david.layout.toggleCrazyRotate();
-          }
-        }
-      */
-
       value: function click() {
         if (this.loading || this.hasStarted) {
           return;
@@ -3098,27 +3272,52 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
         $splashStatus.text("is ready");
         $splashStatus.css("font-style", "italic");
 
-        setTimeout(function () {
-          if (!_this.hasStarted) {
-            $("#splash-controls").fadeIn(1000);
-          }
-        }, 250);
-        setTimeout(function () {
-          if (!_this.hasStarted) {
-            $("#click-to-start").fadeIn(1000);
-          }
-        }, 1750);
+        if (this.onPhone) {
+          $("#mobile-error-overlay").fadeIn(1000);
+        } else {
+          setTimeout(function () {
+            if (!_this.hasStarted) {
+              $("#splash-controls").fadeIn(1000);
+            }
+          }, 250);
+          setTimeout(function () {
+            if (!_this.hasStarted) {
+              $("#click-to-start").fadeIn(1000);
+            }
+          }, 1750);
+        }
       }
     },
     start: {
       value: function start() {
         $("#splash-overlay").fadeOut(1000);
+        if (this.onPhone) {
+          $("#mobile-error-overlay").fadeOut(1000);
+        }
 
-        this.sound.loop().play().fadeIn();
+        this.sound.loop().play().fadeIn().fadeOut();
 
         this.david.layout.start();
 
         this.hasStarted = true;
+
+        if (!this.onPhone) {
+          // after 90 seconds show the first key hint
+          setTimeout(function () {
+            $("#key-hint-1").fadeIn(666);
+            setTimeout(function () {
+              $("#key-hint-1").fadeOut(666);
+            }, 9666);
+          }, 90 * 1000);
+
+          // after 4 minutes show the second key hint
+          setTimeout(function () {
+            $("#key-hint-2").fadeIn(666);
+            setTimeout(function () {
+              $("#key-hint-2").fadeOut(666);
+            }, 9666);
+          }, 240 * 1000);
+        }
       }
     },
     makeLights: {
@@ -3188,6 +3387,8 @@ var MainScene = require("./main-scene.es6").MainScene;
 
 var FlyControls = require("./controls/fly-controls");
 
+var ON_PHONE = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
 var Sheen = (function (_ThreeBoiler) {
   function Sheen() {
     var _this = this;
@@ -3196,24 +3397,36 @@ var Sheen = (function (_ThreeBoiler) {
 
     _get(Object.getPrototypeOf(Sheen.prototype), "constructor", this).call(this, {
       antialias: true,
-      alpha: true
+      alpha: true,
+      onPhone: ON_PHONE
     });
 
-    this.renderer.shadowMapEnabled = true;
-    this.renderer.shadowMapCullFace = THREE.CullFaceBack;
-    this.renderer.shadowMapType = THREE.PCFSoftShadowMap;
+    var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+    if (!isChrome) {
+      $("#splash-please-use-chrome").show();
+    }
 
-    this.renderer.gammaInput = true;
-    this.renderer.gammaOutput = true;
+    if (this.renderer) {
+      this.renderer.shadowMapEnabled = true;
+      this.renderer.shadowMapCullFace = THREE.CullFaceBack;
+      this.renderer.shadowMapType = THREE.PCFSoftShadowMap;
+
+      this.renderer.gammaInput = true;
+      this.renderer.gammaOutput = true;
+    }
 
     this.controls = new FlyControls(this.camera);
     this.scene.add(this.controls.getObject());
 
-    this.mainScene = new MainScene(this.renderer, this.camera, this.scene, {});
+    this.mainScene = new MainScene(this.renderer, this.camera, this.scene, { onPhone: ON_PHONE });
     this.mainScene.controlObject = this.controls.getObject();
     this.mainScene.pitchObject = this.controls.pitchObject();
 
-    $(document).click(function () {
+    $(document).click(function (ev) {
+      if ($(ev.target).is("a")) {
+        return;
+      }
+
       if (_this.controls.requestPointerlock) {
         _this.controls.requestPointerlock();
       }
@@ -3257,21 +3470,32 @@ var Sheen = (function (_ThreeBoiler) {
         this.mainScene.update();
       }
     },
+    keypress: {
+      value: function keypress(keycode) {
+        _get(Object.getPrototypeOf(Sheen.prototype), "keypress", this).call(this, keycode);
+
+        switch (keycode) {
+          case 113:
+            /* q */
+            this.mainScene.toggleCrazyRotation();
+            break;
+
+          case 114:
+            /* r */
+            this.mainScene.toggleSingleRotation();
+            break;
+
+          case 112:
+            /* p */
+            this.mainScene.toggleBigCube();
+            break;
+        }
+      }
+    },
     spacebarPressed: {
       value: function spacebarPressed() {
         this.mainScene.spacebarPressed();
       }
-
-      /*  keypress(82)  {
-       this.mainScene.keypress(82);
-       }
-      
-      
-       keypress(82)  {
-       this.mainScene.keypress(81);
-       }
-       */
-
     }
   });
 
@@ -3529,7 +3753,7 @@ var SheenScene = exports.SheenScene = (function () {
 
     this.domContainer = $("body");
 
-    this.domContainer.click(this.click.bind(this));
+    // TODO: LOL ? this.domContainer.click(this.click.bind(this));
     $(window).resize(this.resize.bind(this));
 
     this.hasStarted = false;
@@ -3700,20 +3924,23 @@ var ThreeBoiler = exports.ThreeBoiler = (function () {
 
     _classCallCheck(this, ThreeBoiler);
 
-    try {
-      this.renderer = new THREE.WebGLRenderer(rendererOptions);
-      this.renderMode = "webgl";
-    } catch (e) {
-      $(".webgl-error").show();
-      setTimeout(function () {
-        $(".webgl-error").fadeOut();
-      }, 6666);
-      this.renderer = new THREE.CanvasRenderer();
-      this.renderMode = "canvas";
-    }
+    this.onPhone = rendererOptions.onPhone || false;
+    if (!this.onPhone) {
+      try {
+        this.renderer = new THREE.WebGLRenderer(rendererOptions);
+        this.renderMode = "webgl";
+      } catch (e) {
+        $(".webgl-error").show();
+        setTimeout(function () {
+          $(".webgl-error").fadeOut();
+        }, 6666);
+        this.renderer = new THREE.CanvasRenderer();
+        this.renderMode = "canvas";
+      }
 
-    this.renderer.setClearColor(16777215, 1);
-    document.body.appendChild(this.renderer.domElement);
+      this.renderer.setClearColor(16777215, 1);
+      document.body.appendChild(this.renderer.domElement);
+    }
 
     this.scene = this.createScene();
 
@@ -3765,12 +3992,16 @@ var ThreeBoiler = exports.ThreeBoiler = (function () {
 
         this.frame += 1;
 
-        this.renderer.render(this.scene, this.camera);
+        if (this.renderer) {
+          this.renderer.render(this.scene, this.camera);
+        }
       }
     },
     resize: {
       value: function resize() {
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        if (this.renderer) {
+          this.renderer.setSize(window.innerWidth, window.innerHeight);
+        }
 
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();

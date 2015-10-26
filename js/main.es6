@@ -8,28 +8,42 @@ import {MainScene} from './main-scene.es6';
 
 let FlyControls = require('./controls/fly-controls');
 
+var ON_PHONE = (/Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+
 class Sheen extends ThreeBoiler {
   constructor() {
     super({
       antialias: true,
-      alpha: true
+      alpha: true,
+      onPhone: ON_PHONE
     });
 
-    this.renderer.shadowMapEnabled = true;
-    this.renderer.shadowMapCullFace = THREE.CullFaceBack;
-    this.renderer.shadowMapType = THREE.PCFSoftShadowMap;
+    var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+    if (!isChrome) {
+      $('#splash-please-use-chrome').show();
+    }
 
-    this.renderer.gammaInput = true;
-	  this.renderer.gammaOutput = true;
+    if (this.renderer) {
+      this.renderer.shadowMapEnabled = true;
+      this.renderer.shadowMapCullFace = THREE.CullFaceBack;
+      this.renderer.shadowMapType = THREE.PCFSoftShadowMap;
+
+      this.renderer.gammaInput = true;
+  	  this.renderer.gammaOutput = true;
+    }
 
     this.controls = new FlyControls(this.camera);
     this.scene.add(this.controls.getObject());
 
-    this.mainScene = new MainScene(this.renderer, this.camera, this.scene, {});
+    this.mainScene = new MainScene(this.renderer, this.camera, this.scene, {onPhone: ON_PHONE});
     this.mainScene.controlObject = this.controls.getObject();
     this.mainScene.pitchObject = this.controls.pitchObject();
 
-    $(document).click(() => {
+    $(document).click((ev) => {
+      if ($(ev.target).is('a')) {
+        return;
+      }
+
       if (this.controls.requestPointerlock) {
         this.controls.requestPointerlock();
       }
@@ -67,24 +81,29 @@ class Sheen extends ThreeBoiler {
     this.mainScene.update();
   }
 
+  keypress(keycode) {
+    super.keypress(keycode);
+
+    switch (keycode) {
+      case 113: /* q */
+        this.mainScene.toggleCrazyRotation();
+        break;
+
+      case 114: /* r */
+        this.mainScene.toggleSingleRotation();
+        break;
+
+      case 112: /* p */
+        this.mainScene.toggleBigCube();
+        break;
+    }
+  }
+
   spacebarPressed() {
     this.mainScene.spacebarPressed();
   }
 
- /*  keypress(82)  {
-  this.mainScene.keypress(82);
-  }
-
-
-  keypress(82)  {
-  this.mainScene.keypress(81);
-  }
-  */
-
 }
-
-
-
 
 $(function() {
   var sheen = new Sheen();
