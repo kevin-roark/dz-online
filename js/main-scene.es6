@@ -166,21 +166,21 @@ export class MainScene extends SheenScene {
     this.hasStarted = true;
 
     if (!this.onPhone) {
-      // after 90 seconds show the first key hint
+      // after 43 seconds show the first key hint
       setTimeout(function() {
         $('#key-hint-1').fadeIn(666);
         setTimeout(function() {
           $('#key-hint-1').fadeOut(666);
         }, 9666);
-      }, 90 * 1000);
+      }, 43 * 1000);
 
-      // after 4 minutes show the second key hint
+      // after 3.5 minutes show the second key hint
       setTimeout(() => {
         $('#key-hint-2').fadeIn(666);
         setTimeout(function() {
           $('#key-hint-2').fadeOut(666);
         }, 9666);
-      }, 240 * 1000);
+      }, 210 * 1000);
     }
   }
 
