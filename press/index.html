@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="icon" href="http://www.davidzwirner.com/favicon.ico">
+
+    <title>David Zwirnher Online: Press Release</title>
+
+    <meta name="google-site-verification" content="e3hfzmk_K1V_tIWlgciwbDLY10ttFDiplknD05z7BLc" />
+    <meta name="description" content="David Zwirnher Online: Press Release" />
+    <meta name="author" content="gallery@home">
+    <meta name="keywords" content="David Zwirnher Online, online gallery, the gallery online, please help me look at art online">
+
+    <meta property="og:title" content="David Zwirnher Online: Press Release"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:image" content="http://www.davidzwirnher.com/media/mobile_error.jpg"/>
+    <meta property="og:description" content="David Zwirnher Online: Press Release"/>
+    <meta property="og:url" content="http://www.davidzwirnher.com/press"/>
+
+    <meta property="fb:admins" content="100000919641751"/>
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@LIMP__BISCUIT" />
+    <meta name="twitter:creator" content="@LIMP__BISCUIT" />
+</head>
+<body>
+    <!-- content -->
+    <div class="splash-overlay">
+      <div class="title">David Zwirnher Online: Press Release</div>
+      <div class="description-text">
+        David Zwirnher Online is an easy way to view all of the artworks
+        ever exhibited at David Zwirnher's New York City based Art Gallery.<br>
+        Click right here to explore
+        <a href="http://www.davidzwirnher.com/">David Zwirnher Online</a>
+        for yourself, you will not regret it.
+      </div>
+    </div>
+
+    <!-- scripts -->
+    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script>
+      var phraseBank = [
+        'look at it in your home',
+        'David let us',
+        'fall through an infinite hole of images',
+        'these are images of real art and real people',
+        "sounds that you wouldn't beleieve",
+        'from Flavin to the rest of it',
+        '20 minutes in the flesh, infinity in the mind',
+        'the kind of experience that shatters the heart'
+      ];
+      var $container = $('body');
+
+      setTimeout(bankAPhrase, 2500);
+
+      function bankAPhrase() {
+        var phraseIndex = Math.floor(Math.random() * phraseBank.length); // choose a random phrase
+        var phrase = phraseBank[phraseIndex];
+        phraseBank.splice(phraseIndex, 1); // remove it from bank
+
+        var div = $('<div class="press-phrase">' + phrase + '</div>');
+        $container.append(div);
+
+        var x = Math.random() * (window.innerWidth - div.width());
+        div.css('left', x + 'px');
+
+        var y = Math.random() * (window.innerHeight - div.height());
+        div.css('top', (-div.height() - 20) + 'px'); // start above the screen
+        div.animate({top: y}, Math.random() * 5000 + 666); // animate with variable duration to the desired y
+
+        if (phraseBank.length > 0) {
+          setTimeout(bankAPhrase, Math.random() * 3000 + 1000);
+        }
+      }
+
+    </script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-50868415-5', 'auto');
+      ga('send', 'pageview');
+    </script>
+</body>
+</html>
