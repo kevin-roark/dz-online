@@ -30,7 +30,7 @@ export class MainScene extends SheenScene {
     this.updateLoadingView();
 
     this.sound = new buzz.sound('/media/falling3', {
-      formats: ["mp3"],
+      formats: ["mp3", "ogg"],
       webAudioApi: true,
       volume: 100
     });
