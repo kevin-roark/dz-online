@@ -48,6 +48,7 @@ module.exports.randomGalleryMedia = function(callback) {
 module.exports.compress = function(responseData, addCaption) {
   function minData(data) {
     var min = {
+      id: data.id,
       type: data.type,
       likes: data.likes.count,
       thumbnail: data.images.thumbnail
