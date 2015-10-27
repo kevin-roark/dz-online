@@ -235,7 +235,7 @@ module.exports = function (camera, options) {
 			var movementY = event.movementY || event.mozMovementY || event.webkitMovementY;
 
 			// fallback for browsers with no movement
-			if (movementX === undefined) {
+			if (movementX === undefined || movementY === undefined) {
 				if (this.lastClientX !== undefined) {
 					movementX = event.clientX - this.lastClientX;
 					movementY = event.clientY - this.lastClientY;
@@ -371,45 +371,18 @@ module.exports = function () {
   this.requestPointerlock = function () {
     scope.canRequestPointerlock = true;
 
-    if (/Firefox/i.test(navigator.userAgent)) {
-      var fullscreenchange = (function (_fullscreenchange) {
-        var _fullscreenchangeWrapper = function fullscreenchange() {
-          return _fullscreenchange.apply(this, arguments);
-        };
+    pointerlockElement.requestPointerLock = pointerlockElement.requestPointerLock || pointerlockElement.mozRequestPointerLock || pointerlockElement.webkitRequestPointerLock;
 
-        _fullscreenchangeWrapper.toString = function () {
-          return _fullscreenchange.toString();
-        };
-
-        return _fullscreenchangeWrapper;
-      })(function () {
-        if (document.fullscreenElement === pointerlockElement || document.mozFullscreenElement === pointerlockElement || document.mozFullScreenElement === pointerlockElement) {
-          document.removeEventListener("fullscreenchange", fullscreenchange);
-          document.removeEventListener("mozfullscreenchange", fullscreenchange);
-
-          pointerlockElement.requestPointerLock();
-        }
-      });
-
-      document.addEventListener("fullscreenchange", fullscreenchange, false);
-      document.addEventListener("mozfullscreenchange", fullscreenchange, false);
-
-      pointerlockElement.requestFullscreen = pointerlockElement.requestFullscreen || pointerlockElement.mozRequestFullScreen || pointerlockElement.webkitRequestFullscreen;
-      pointerlockElement.requestFullscreen();
-    } else {
-      pointerlockElement.requestPointerLock = pointerlockElement.requestPointerLock || pointerlockElement.mozRequestPointerLock || pointerlockElement.webkitRequestPointerLock;
-
-      if (pointerlockElement.requestPointerLock) {
-        pointerlockElement.requestPointerLock();
-      }
+    if (pointerlockElement.requestPointerLock) {
+      pointerlockElement.requestPointerLock();
     }
   };
 
   this.exitPointerlock = function () {
-    pointerlockElement.exitPointerLock = pointerlockElement.exitPointerLock || pointerlockElement.mozExitPointerLock || pointerlockElement.webkitExitPointerLock;
+    document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock || document.webkitExitPointerLock;
 
-    if (pointerlockElement.exitPointerLock) {
-      pointerlockElement.exitPointerLock();
+    if (document.exitPointerLock) {
+      document.exitPointerLock();
     }
 
     scope.canRequestPointerlock = false;
@@ -424,6 +397,10 @@ module.exports = function () {
       scope.currentlyHasPointerlock = true;
     } else {
       scope.currentlyHasPointerlock = false;
+    }
+
+    if (scope.pointerLockChangeCallback) {
+      scope.pointerLockChangeCallback(scope.currentlyHasPointerlock);
     }
   }
 
