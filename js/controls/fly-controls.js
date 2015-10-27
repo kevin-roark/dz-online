@@ -203,7 +203,7 @@ module.exports = function (camera, options) {
 			var movementY = event.movementY || event.mozMovementY || event.webkitMovementY;
 
 			// fallback for browsers with no movement
-		  if (movementX === undefined) {
+		  if (movementX === undefined || movementY === undefined) {
 		    if (this.lastClientX !== undefined) {
 		      movementX = event.clientX - this.lastClientX;
 		      movementY = event.clientY - this.lastClientY;
