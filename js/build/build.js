@@ -3290,7 +3290,7 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
     },
     start: {
       value: function start() {
-        $("#splash-overlay").fadeOut(1000);
+        $(".splash-overlay").fadeOut(1000);
         if (this.onPhone) {
           $("#mobile-error-overlay").fadeOut(1000);
         }
