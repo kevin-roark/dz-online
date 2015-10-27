@@ -81,7 +81,7 @@
           var y = Math.random() * (window.innerHeight - div.height());
         }
         else {
-          var y = Math.random() * 100 * (div.height());
+          var y = Math.random() * 2000 * (Math.floor(Math.random() * 10) + 1);
         }
 
         if (y > maxHeight) {
@@ -99,7 +99,7 @@
         else {
           setPhraseBank();
           waitTime = waitTime/2;
-          setTimeout(bankAPhrase, (waitTime + 50)*6);
+          setTimeout(bankAPhrase, (waitTime + 40)*6);
         }
       }
     </script>
