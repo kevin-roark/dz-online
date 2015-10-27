@@ -122,6 +122,6 @@ a {
   }
 
 .press-phrase {
-  position: absolute; z-index: 1000;
+  position: absolute; z-index: -1;
   font-size: 21px; max-width: 333px; line-height: 28px;
 }

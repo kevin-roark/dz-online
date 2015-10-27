@@ -24,18 +24,12 @@
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@LIMP__BISCUIT" />
     <meta name="twitter:creator" content="@LIMP__BISCUIT" />
-
-    <style>
-    #highZ {
-      z-index: 1000;
-    }
-    </style>
 </head>
 <body>
     <!-- content -->
     <div class="splash-overlay">
       <div class="title">David Zwirnher Online: Press Release</div>
-      <div class="description-text" id="highZ">
+      <div class="description-text">
         David Zwirnher Online is an easy way to view all of the artworks
         ever exhibited at David Zwirnher's New York City based Art Gallery.<br>
         Click right here to explore
@@ -47,31 +41,33 @@
     <!-- scripts -->
     <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
     <script>
-    var phraseBank = [];
-    var waitTime = 3000;
-    function setPhraseBank(){
-    phraseBank = [
-      'look at it in your home',
-      'David let us',
-      'fall through an infinite hole of images',
-      'these are images of real art and real people',
-      "sounds that you wouldn't beleieve",
-      'from Flavin to the rest of it',
-      '20 minutes in the flesh, infinity in the mind',
-      'the kind of experience that shatters the heart',
-      'speed through the historical record of gallery sociality',
-      'gasp at the sublime clarity of the artwork',
-      'feel your limbs growing numb as your eyes become one with the screen',
-      'the first online portal to capture the velocity of the artistic experience'
-    ];
-  }
-      var $container = $('body');
+      var phraseBank = [];
+      var waitTime = 3000;
+      var maxHeight = window.innerHeight;
+      var $container = $('.splash-overlay');
+      $('body').css('overflow-y', 'scroll');
+
+      function setPhraseBank(){
+        phraseBank = [
+          'look at it in your home',
+          'David let us',
+          'fall through an infinite hole of images',
+          'these are images of real art and real people',
+          "sounds that you wouldn't beleieve",
+          'from Flavin to the rest of it',
+          '20 minutes in the flesh, infinity in the mind',
+          'the kind of experience that shatters the heart',
+          'speed through the historical record of gallery sociality',
+          'gasp at the sublime clarity of the artwork',
+          'feel your limbs growing numb as your eyes become one with the screen',
+          'the first online portal to capture the velocity of the artistic experience'
+        ];
+      }
 
       setTimeout(bankAPhrase, 2500);
       setPhraseBank();
 
       function bankAPhrase() {
-
         var phraseIndex = Math.floor(Math.random() * phraseBank.length); // choose a random phrase
         var phrase = phraseBank[phraseIndex];
         phraseBank.splice(phraseIndex, 1); // remove it from bank
@@ -87,9 +83,11 @@
         else {
           var y = Math.random() * 100 * (div.height());
         }
-        if (y > window.innerHeight){
-        document.body.style.height = y;
-        console.log(document.body.style.height);
+
+        if (y > maxHeight) {
+          maxHeight = y;
+          $('body').css('height', y + 'px');
+          $container.css('height', y + 'px');
         }
 
         div.css('top', (-div.height() - 20) + 'px'); // start above the screen
@@ -98,14 +96,12 @@
         if (phraseBank.length > 0) {
           setTimeout(bankAPhrase, (Math.random()+0.3) * waitTime);
         }
-        if (phraseBank.length === 0)
-        {
+        else {
           setPhraseBank();
           waitTime = waitTime/2;
           setTimeout(bankAPhrase, (waitTime + 50)*6);
         }
       }
-
     </script>
     <script>
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
