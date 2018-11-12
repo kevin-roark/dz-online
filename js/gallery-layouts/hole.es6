@@ -1,13 +1,12 @@
-let THREE = require('three');
-let $ = require('jquery');
-import {GalleryLayout} from './gallery-layout.es6';
+let THREE = require("three");
+let $ = require("jquery");
+import { GalleryLayout } from "./gallery-layout.es6";
 
 /// different hole styles
 /// set imagedepth == distanceBetweenPhotos to get cool no gap style
 //
 
 export class Hole extends GalleryLayout {
-
   constructor(options) {
     super(options);
 
@@ -26,8 +25,9 @@ export class Hole extends GalleryLayout {
     this.slowMotionVelocity = options.slowMotionVelocity || -0.01;
     this.ascensionVelocity = options.ascensionVelocity || 0.048;
     this.crazyRotationVelocity = options.crazyRotationVelocity || 0.0005;
-    this.crazyRotationAcceleration = options.crazyRotationAcceleration || 0.000008;
-    this.bigCubeStyle = options.bigCubeStyle || 'none';
+    this.crazyRotationAcceleration =
+      options.crazyRotationAcceleration || 0.000008;
+    this.bigCubeStyle = options.bigCubeStyle || "none";
     this.bigCubeCount = options.bigCubeCount || 26;
     this.bigCubeLength = options.bigCubeLength || 500;
     this.cycleMultiplier = options.cycleMultiplier || 25; // 20-25 keeps up with images, 1 starts from beginning like old v1; if value is too high you can run out of images after many toggles.
@@ -37,7 +37,9 @@ export class Hole extends GalleryLayout {
     this.halfActiveMeshCount = this.activeMeshCount / 2;
     this.nextMediaToPassIndex = 0;
     this.hasReachedBottom = false;
-    this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaToPassIndex);
+    this.nextMediaToPassPosition = this.yForMediaWithIndex(
+      this.nextMediaToPassIndex
+    );
     this.nextMediaToAddIndex = this.activeMeshCount; // we will layout 0 -> 665 in the constructor
     this.activeMeshes = [];
 
@@ -59,10 +61,11 @@ export class Hole extends GalleryLayout {
 
       // face me down
       this.pitchObject.rotation.x = -Math.PI / 2;
-    }
-    else {
-      this.fullScreenImage = $('<img style="display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: white; z-index: 1000"></img>');
-      $('body').append(this.fullScreenImage);
+    } else {
+      this.fullScreenImage = $(
+        '<img style="display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: white; z-index: 1000"></img>'
+      );
+      $("body").append(this.fullScreenImage);
     }
   }
 
@@ -72,8 +75,8 @@ export class Hole extends GalleryLayout {
     if (this.domMode) {
       setTimeout(() => {
         var media = this.media[0];
-        var imageURL = media.type === 'image' ? media.media.url : media.thumbnail.url;
-        this.fullScreenImage.attr('src', imageURL);
+        var imageURL = media.imgSrc;
+        this.fullScreenImage.attr("src", imageURL);
       }, 3000);
     }
   }
@@ -90,27 +93,28 @@ export class Hole extends GalleryLayout {
       if (!this.inSlowMotion) {
         if (this.downwardVelocity > this.thresholdVelocity) {
           this.downwardVelocity += this.slowAcceleration;
-        }
-        else {
+        } else {
           this.downwardVelocity += this.fastAcceleration;
         }
 
         this.controlObject.translateY(this.downwardVelocity);
 
         this.crazyRotationVelocity += this.crazyRotationAcceleration;
+      } else {
+        this.controlObject.translateY(
+          Math.max(this.slowMotionVelocity, this.downwardVelocity)
+        );
       }
-      else {
-        this.controlObject.translateY(Math.max(this.slowMotionVelocity, this.downwardVelocity));
-      }
-    }
-    else if (this.ascending) {
+    } else if (this.ascending) {
       // permanently rise
       this.controlObject.translateY(this.ascensionVelocity);
     }
 
     if (!this.domMode) {
-      if (this.bigCubeStyle === 'singleStack') {
-        this.topStackingBigCube.position.y = this.controlObject.position.y + (this.bigCubeLength * this.bigCubeCount / 2);
+      if (this.bigCubeStyle === "singleStack") {
+        this.topStackingBigCube.position.y =
+          this.controlObject.position.y +
+          (this.bigCubeLength * this.bigCubeCount) / 2;
       }
 
       if (this.goCrazyRotate) {
@@ -119,7 +123,10 @@ export class Hole extends GalleryLayout {
       }
     }
 
-    while (this.controlObject.position.y < this.nextMediaToPassPosition && !this.hasReachedBottom) {
+    while (
+      this.controlObject.position.y < this.nextMediaToPassPosition &&
+      !this.hasReachedBottom
+    ) {
       this.didPassMesh();
     }
   }
@@ -128,11 +135,13 @@ export class Hole extends GalleryLayout {
     if (this.domMode) {
       var media = this.media[this.nextMediaToPassIndex + 1];
       if (media) {
-        var imageURL = media.type === 'image' ? media.media.url : media.thumbnail.url;
-        this.fullScreenImage.attr('src', imageURL);
+        var imageURL = media.imgSrc;
+        this.fullScreenImage.attr("src", imageURL);
       }
       this.nextMediaToPassIndex += 1;
-      this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaToPassIndex);
+      this.nextMediaToPassPosition = this.yForMediaWithIndex(
+        this.nextMediaToPassIndex
+      );
       return;
     }
 
@@ -143,26 +152,38 @@ export class Hole extends GalleryLayout {
       this.container.remove(meshToRemove);
 
       // add the next media to the barrel
-      this.layoutMedia(this.nextMediaToAddIndex, this.media[this.nextMediaToAddIndex]);
+      this.layoutMedia(
+        this.nextMediaToAddIndex,
+        this.media[this.nextMediaToAddIndex]
+      );
       this.nextMediaToAddIndex += 1;
     }
 
     this.nextMediaToPassIndex += 1;
-    this.nextMediaToPassPosition = this.yForMediaWithIndex(this.nextMediaToPassIndex);
+    this.nextMediaToPassPosition = this.yForMediaWithIndex(
+      this.nextMediaToPassIndex
+    );
     //console.log('my pass index is ' + this.nextMediaToPassIndex);
 
-    if (this.bigCubeStyle === 'singleStack') {
+    if (this.bigCubeStyle === "singleStack") {
       // update big cube with the current passing item
       this.updateStackingBigCubeTextures(this.media[this.nextMediaToPassIndex]);
-    }
-    else if (this.bigCubeStyle === 'layer' && (this.nextMediaToPassIndex - 1) % 25 === 0) {
-      var bottomMeshIndex = (this.nextMediaToPassIndex - 1) + (this.bigCubeCount / 2) * 25;
+    } else if (
+      this.bigCubeStyle === "layer" &&
+      (this.nextMediaToPassIndex - 1) % 25 === 0
+    ) {
+      var bottomMeshIndex =
+        this.nextMediaToPassIndex - 1 + (this.bigCubeCount / 2) * 25;
       if (bottomMeshIndex >= this.media.count) {
         return;
       }
 
       var bigMesh = this.createBigCube(this.media[bottomMeshIndex]);
-      bigMesh.position.set(this.xPosition, this.controlObject.position.y + (this.bigCubeCount / 2) * -500, this.zPosition);
+      bigMesh.position.set(
+        this.xPosition,
+        this.controlObject.position.y + (this.bigCubeCount / 2) * -500,
+        this.zPosition
+      );
       this.container.add(bigMesh);
       this.bigLayeredCubes.push(bigMesh);
 
@@ -188,10 +209,13 @@ export class Hole extends GalleryLayout {
     //console.log('laying out: ' + index);
 
     var width = this.imageWidth;
-    var height = (media.thumbnail.width / media.thumbnail.height) * width;
+    var height = width; //(media.thumbnail.width / media.thumbnail.height) * width;
     var mesh = new THREE.Mesh(
       new THREE.BoxGeometry(width, height, this.imageDepth),
-      new THREE.MeshBasicMaterial({map: this.createTexture(media), side: THREE.DoubleSide})
+      new THREE.MeshBasicMaterial({
+        map: this.createTexture(media),
+        side: THREE.DoubleSide
+      })
     );
 
     mesh.castShadow = true;
@@ -202,14 +226,18 @@ export class Hole extends GalleryLayout {
     }
 
     // cool stacky intersection way: this.yLevel - (index * repeatIndex * this.distanceBetweenPhotos)
-    mesh.position.set(this.xPosition, this.yForMediaWithIndex(index), this.zPosition);
+    mesh.position.set(
+      this.xPosition,
+      this.yForMediaWithIndex(index),
+      this.zPosition
+    );
 
     this.container.add(mesh);
     this.activeMeshes.push(mesh);
   }
 
   yForMediaWithIndex(index) {
-    var y = this.yLevel - (index * this.distanceBetweenPhotos);
+    var y = this.yLevel - index * this.distanceBetweenPhotos;
     return y;
   }
 
@@ -219,15 +247,13 @@ export class Hole extends GalleryLayout {
 
   toggleBigCube() {
     if (!this.hasReachedBottom) {
-      if (this.bigCubeStyle === 'singleStack') {
-        this.bigCubeStyle = 'layer';
+      if (this.bigCubeStyle === "singleStack") {
+        this.bigCubeStyle = "layer";
         this.CubeToggleCount = this.CubeToggleCount + 1;
-        }
-      else if (this.bigCubeStyle === 'layer') {
-        this.bigCubeStyle = 'none';
-        }
-      else if (this.bigCubeStyle === 'none') {
-        this.bigCubeStyle = 'singleStack';
+      } else if (this.bigCubeStyle === "layer") {
+        this.bigCubeStyle = "none";
+      } else if (this.bigCubeStyle === "none") {
+        this.bigCubeStyle = "singleStack";
       }
 
       this.handleBigCubeState();
@@ -235,48 +261,61 @@ export class Hole extends GalleryLayout {
   }
 
   handleBigCubeState() {
-    if (this.bigCubeStyle === 'singleStack') {
-      this.topStackingBigCube = this.createBigCube(this.media[this.nextMediaToPassIndex]);
+    if (this.bigCubeStyle === "singleStack") {
+      this.topStackingBigCube = this.createBigCube(
+        this.media[this.nextMediaToPassIndex]
+      );
       this.container.add(this.topStackingBigCube);
 
       this.childStackingBigCubes = [];
       for (var i = 1; i < this.bigCubeCount; i++) {
-        var cube = (i == 1) ? this.createBigCube(this.media[this.nextMediaToPassIndex]) : this.childStackingBigCubes[0].clone();
+        var cube =
+          i == 1
+            ? this.createBigCube(this.media[this.nextMediaToPassIndex])
+            : this.childStackingBigCubes[0].clone();
         cube.position.y = -i * this.bigCubeLength;
         this.topStackingBigCube.add(cube);
         this.childStackingBigCubes.push(cube);
       }
-    }
-    else {
+    } else {
       this.container.remove(this.topStackingBigCube);
       this.topStackingBigCube = null;
       this.childStackingBigCubes = null;
     }
 
-    if (this.bigCubeStyle === 'layer') {
+    if (this.bigCubeStyle === "layer") {
       this.bigLayeredCubes = [];
 
-      for (var i = 0; i < (this.bigCubeCount / 2); i++) {
-        var belowIndex = (i + this.nextMediaToPassIndex) + (i * this.cycleMultiplier);
+      for (var i = 0; i < this.bigCubeCount / 2; i++) {
+        var belowIndex =
+          i + this.nextMediaToPassIndex + i * this.cycleMultiplier;
         if (belowIndex < this.media.length) {
           var bigMesh = this.createBigCube(this.media[belowIndex]);
-          bigMesh.position.set(this.xPosition, (this.controlObject.position.y || 0) + (i * -500), this.zPosition);
+          bigMesh.position.set(
+            this.xPosition,
+            (this.controlObject.position.y || 0) + i * -500,
+            this.zPosition
+          );
           this.container.add(bigMesh);
           this.bigLayeredCubes.push(bigMesh);
         }
 
         if (i > 0) {
-          var aboveIndex = (this.nextMediaToPassIndex - i) + (i * this.cycleMultiplier);
+          var aboveIndex =
+            this.nextMediaToPassIndex - i + i * this.cycleMultiplier;
           if (aboveIndex >= 0) {
             var bigMesh = this.createBigCube(this.media[aboveIndex]);
-            bigMesh.position.set(this.xPosition, (this.controlObject.position.y || 0) + (i * 500), this.zPosition);
+            bigMesh.position.set(
+              this.xPosition,
+              (this.controlObject.position.y || 0) + i * 500,
+              this.zPosition
+            );
             this.container.add(bigMesh);
             this.bigLayeredCubes.push(bigMesh);
           }
         }
       }
-    }
-    else {
+    } else {
       if (this.bigLayeredCubes) {
         for (var i = 0; i < this.bigLayeredCubes.length; i++) {
           var bigLayerCube = this.bigLayeredCubes[i];
@@ -310,9 +349,15 @@ export class Hole extends GalleryLayout {
   }
 
   createBigCube(media) {
-    var material = media ? this.bigCubeMaterial(media) : new THREE.MeshFaceMaterial();
+    var material = media
+      ? this.bigCubeMaterial(media)
+      : new THREE.MeshFaceMaterial();
     return new THREE.Mesh(
-      new THREE.BoxGeometry(this.bigCubeLength, this.bigCubeLength, this.bigCubeLength),
+      new THREE.BoxGeometry(
+        this.bigCubeLength,
+        this.bigCubeLength,
+        this.bigCubeLength
+      ),
       material
     );
   }
@@ -321,18 +366,20 @@ export class Hole extends GalleryLayout {
     if (!media) return null;
     var texture = this.createTexture(media);
 
-    var material = new THREE.MeshBasicMaterial({map: texture, side: THREE.DoubleSide}); // want shiny? maybe l8r
+    var material = new THREE.MeshBasicMaterial({
+      map: texture,
+      side: THREE.DoubleSide
+    }); // want shiny? maybe l8r
 
     var materials = [
-      material,         // Left side
+      material, // Left side
       material.clone(), // Right side
-      new THREE.MeshBasicMaterial({transparent: true, opacity: 0.0}), // Top side
-      new THREE.MeshBasicMaterial({transparent: true, opacity: 0.0}), // Bottom side
+      new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.0 }), // Top side
+      new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.0 }), // Bottom side
       material.clone(), // Front side
-      material.clone()  // Back side
+      material.clone() // Back side
     ];
 
     return new THREE.MeshFaceMaterial(materials);
   }
-
 }

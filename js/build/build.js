@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 /**
  * Originally by James Baicoianu / http://www.baicoianu.com/
  * Modified by Kevin Roark (porkf.at) to meld with pointerlock controls
@@ -445,7 +445,6 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
 var THREE = require("three");
 var imageUtil = require("../image-util");
 
@@ -472,7 +471,7 @@ var GalleryLayout = exports.GalleryLayout = (function () {
     },
     createTexture: {
       value: function createTexture(media) {
-        var imageURL = media.type === "image" ? media.media.url : media.thumbnail.url;
+        var imageURL = media.imgSrc;
         var texture = imageUtil.loadTexture(imageURL, false);
         texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
         texture.minFilter = THREE.NearestFilter;
@@ -581,7 +580,7 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
         if (this.domMode) {
           setTimeout(function () {
             var media = _this.media[0];
-            var imageURL = media.type === "image" ? media.media.url : media.thumbnail.url;
+            var imageURL = media.imgSrc;
             _this.fullScreenImage.attr("src", imageURL);
           }, 3000);
         }
@@ -638,7 +637,7 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
         if (this.domMode) {
           var media = this.media[this.nextMediaToPassIndex + 1];
           if (media) {
-            var imageURL = media.type === "image" ? media.media.url : media.thumbnail.url;
+            var imageURL = media.imgSrc;
             this.fullScreenImage.attr("src", imageURL);
           }
           this.nextMediaToPassIndex += 1;
@@ -698,8 +697,11 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
         //console.log('laying out: ' + index);
 
         var width = this.imageWidth;
-        var height = media.thumbnail.width / media.thumbnail.height * width;
-        var mesh = new THREE.Mesh(new THREE.BoxGeometry(width, height, this.imageDepth), new THREE.MeshBasicMaterial({ map: this.createTexture(media), side: THREE.DoubleSide }));
+        var height = width; //(media.thumbnail.width / media.thumbnail.height) * width;
+        var mesh = new THREE.Mesh(new THREE.BoxGeometry(width, height, this.imageDepth), new THREE.MeshBasicMaterial({
+          map: this.createTexture(media),
+          side: THREE.DoubleSide
+        }));
 
         mesh.castShadow = true;
 
@@ -831,7 +833,10 @@ var Hole = exports.Hole = (function (_GalleryLayout) {
           return null;
         }var texture = this.createTexture(media);
 
-        var material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide }); // want shiny? maybe l8r
+        var material = new THREE.MeshBasicMaterial({
+          map: texture,
+          side: THREE.DoubleSide
+        }); // want shiny? maybe l8r
 
         var materials = [material, // Left side
         material.clone(), // Right side
@@ -859,7 +864,6 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
 var THREE = require("three");
 var Physijs = require("./lib/physi.js");
 var $ = require("jquery");
@@ -896,7 +900,7 @@ var Gallery = exports.Gallery = (function () {
       value: function create(callback) {
         var _this = this;
 
-        var filename = "/data/dz_media.json";
+        var filename = "/data/212943401_media.json";
         $.getJSON(filename, function (data) {
           //console.log(data);
 

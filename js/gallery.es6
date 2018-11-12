@@ -1,23 +1,23 @@
+let THREE = require("three");
+let Physijs = require("./lib/physi.js");
+let $ = require("jquery");
+let kt = require("kutility");
+let SheenMesh = require("./sheen-mesh");
+let imageUtil = require("./image-util");
+let geometryUtil = require("./geometry-util");
 
-let THREE = require('three');
-let Physijs = require('./lib/physi.js');
-let $ = require('jquery');
-let kt = require('kutility');
-let SheenMesh = require('./sheen-mesh');
-let imageUtil = require('./image-util');
-let geometryUtil = require('./geometry-util');
-
-import {Hole} from './gallery-layouts/hole.es6';
+import { Hole } from "./gallery-layouts/hole.es6";
 
 export class Gallery {
-
   constructor(scene, options) {
     this.scene = scene;
     this.controlObject = options.controlObject;
     this.pitchObject = options.pitchObject;
     this.domMode = options.domMode;
     this.yLevel = options.yLevel || 0;
-    this.layoutCreator = (options) => { return new Hole(options); };
+    this.layoutCreator = options => {
+      return new Hole(options);
+    };
 
     this.meshContainer = new THREE.Object3D();
 
@@ -28,8 +28,8 @@ export class Gallery {
   }
 
   create(callback) {
-    var filename = '/data/dz_media.json';
-    $.getJSON(filename, (data) => {
+    var filename = "/data/212943401_media.json";
+    $.getJSON(filename, data => {
       //console.log(data);
 
       this.layout = this.layoutCreator({
@@ -56,12 +56,11 @@ export class Gallery {
   destroy() {
     this.scene.remove(this.meshContainer);
   }
-
 }
 
 function createGround(length, y) {
   return new SheenMesh({
-    meshCreator: (callback) => {
+    meshCreator: callback => {
       let geometry = new THREE.PlaneBufferGeometry(length, length);
       geometryUtil.computeShit(geometry);
 
@@ -84,8 +83,6 @@ function createGround(length, y) {
 
     position: new THREE.Vector3(0, y, 0),
 
-    collisionHandler: () => {
-
-    }
+    collisionHandler: () => {}
   });
 }
