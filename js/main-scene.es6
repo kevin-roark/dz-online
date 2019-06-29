@@ -1,7 +1,7 @@
 
 let THREE = require('three');
 let $ = require('jquery');
-let buzz = require('./lib/buzz.js');
+let {Howl, Howler} = require('howler');
 let kt = require('kutility');
 
 import {SheenScene} from './sheen-scene.es6';
@@ -29,13 +29,7 @@ export class MainScene extends SheenScene {
     this.loading = true;
     this.updateLoadingView();
 
-    this.sound = new buzz.sound('/media/falling3', {
-      formats: ["mp3", "ogg"],
-      webAudioApi: true,
-      volume: 100
-    });
-    buzz.defaults.duration = 2000;
-
+   
     this.makeLights();
 
     // make all the galleries here
@@ -158,8 +152,22 @@ export class MainScene extends SheenScene {
     if (this.onPhone) {
       $('#mobile-error-overlay').fadeOut(1000);
     }
+    
+    this.sound = new buzz.sound('/media/falling3', {
+      formats: ["mp3", "ogg"],
+      webAudioApi: true,
+      volume: 100
+    });
 
-    this.sound.loop().play().fadeIn().fadeOut();
+    this.sound = new Howl({
+      src: ['/media/falling3'],
+      loop: true,
+      volume: 1,
+    });
+
+    this.sound.play()
+
+    console.log("playing music!")
 
     this.david.layout.start();
 
